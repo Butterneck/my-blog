@@ -1,0 +1,27 @@
+version: '3'
+services:
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    image: test
+    container_name: backend
+    command: ./main
+    volumes:
+      - ~/.aws-lambda-rie:/aws-lambda
+    ports:
+      - "9000:8080"
+    entrypoint: /aws-lambda/aws-lambda-rie
+
+  ddb:
+    command: "-jar DynamoDBLocal.jar -sharedDb"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    volumes:
+      - dynamodb-data:/home/dynamodblocal/data
+    working_dir: /home/dynamodblocal
+    
+volumes:
+  dynamodb-data:
