@@ -3,8 +3,8 @@ package main
 import (
 	"net/http"
 
-	"github.com/butterneck/my-blog/backend/log"
-	"github.com/butterneck/my-blog/backend/models"
+	"github.com/butterneck/my-blog/src/log"
+	"github.com/butterneck/my-blog/src/models"
 	"github.com/gin-gonic/gin"
 )
 
