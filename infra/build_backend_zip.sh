@@ -1,6 +1,6 @@
 set -x
 
-cd ../src
+cd ../src/blog-backend
 
 GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o bootstrap 
 

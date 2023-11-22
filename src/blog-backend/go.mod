@@ -1,4 +1,4 @@
-module github.com/butterneck/my-blog/src
+module github.com/butterneck/my-blog/src/blog-backend
 
 go 1.20
 

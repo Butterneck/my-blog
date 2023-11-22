@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/butterneck/my-blog/src/db"
+	"github.com/butterneck/my-blog/src/blog-backend/db"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )

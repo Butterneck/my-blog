@@ -4,7 +4,7 @@ resource "aws_api_gateway_rest_api" "api" {
 
   api_key_source = "HEADER"
 
-  body = templatefile("${path.module}/../src/openapi.yaml", {
+  body = templatefile("${path.module}/../src/blog-backend/openapi.yaml", {
     backend_lambda_arn    = aws_lambda_function.blog_backend.arn
     cognito_user_pool_arn = aws_cognito_user_pool.pool.arn
   })

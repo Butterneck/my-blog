@@ -13,8 +13,8 @@ resource "aws_s3_bucket" "lambda_bucket" {
 
 data "archive_file" "blog_backend" {
   type        = "zip"
-  source_file = "../src/bootstrap"
-  output_path = "../src/bootstrap.zip"
+  source_file = "../src/blog-backend/bootstrap"
+  output_path = "../src/blog-backend/bootstrap.zip"
 }
 
 # Upload lambda code to S3

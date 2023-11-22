@@ -1,8 +1,9 @@
-import { data } from "$data/posts.json";
-
 export async function load({ params }) {
   const slug = params.slug.toLowerCase();
-  const post = data.find((post) => post.slug == slug);
+
+  const post = await fetch(`https://blog.butterneck.me/api/v1/posts/${slug}`)
+    .then((response) => response.json())
+    .catch((error) => console.log("error", error));
 
   if (post) {
     return {

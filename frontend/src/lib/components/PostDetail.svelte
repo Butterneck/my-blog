@@ -9,7 +9,7 @@
 
     <div class="post-detail__top__info">
       <span class="post-detail__top__info__date">
-        {format(new Date(post.date), "MMMM DD, YYYY")},
+        {format(new Date(post.createdAt), "MMMM DD, YYYY")},
       </span>
 
       <a class="post-detail__top__info__author" href="/about">by Yourname</a>

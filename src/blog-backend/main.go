@@ -6,11 +6,11 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
-	_log "github.com/butterneck/my-blog/src/log"
+	_log "github.com/butterneck/my-blog/src/blog-backend/log"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
-	"github.com/butterneck/my-blog/src/db"
+	"github.com/butterneck/my-blog/src/blog-backend/db"
 )
 
 var ginLambda *ginadapter.GinLambda
