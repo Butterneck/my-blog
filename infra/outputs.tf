@@ -8,3 +8,10 @@ output "backend_lambda_name" {
 
 #   value = 
 # }
+
+
+output "blog_butterneck_me_ns" {
+  description = "Name servers for blog.butterneck.me"
+
+  value = aws_route53_zone.blog_butterneck_me.name_servers
+}

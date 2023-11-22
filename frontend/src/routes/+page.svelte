@@ -46,7 +46,7 @@
 />
 
 <PostList>
-  {#each data.body.posts as post}
+  {#each data.posts as post}
     <PostItem {post} />
   {/each}
 </PostList>

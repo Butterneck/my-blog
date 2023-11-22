@@ -20,12 +20,12 @@ func GetPosts(c *gin.Context) {
 	c.JSON(http.StatusOK, posts)
 }
 
-func GetPost(c *gin.Context) {
+func GetPostBySlug(c *gin.Context) {
 	log := log.GetLogger()
 
-	id := c.Param("id")
+	slug := c.Param("slug")
 
-	post, err := models.GetPersistedPost(c, log, models.PostId(id))
+	post, err := models.GetPersistedPostBySlug(c, log, slug)
 	if err != nil {
 		log.Errorf("GetPost - GetPersistedPost - error: %v", err)
 		c.AbortWithError(http.StatusNotFound, err)
@@ -83,7 +83,7 @@ func UpdatePost(c *gin.Context) {
 
 	log.Debugf("UpdatePost - updatedPostRequest: %v", updatedPostRequest)
 
-	post, err := models.GetPersistedPost(c, log, models.PostId(id))
+	post, err := models.GetPersistedPostById(c, log, models.PostId(id))
 	if err != nil {
 		log.Errorf("UpdatePost - GetPersistedPost - error: %v", err)
 		c.AbortWithError(http.StatusNotFound, err)

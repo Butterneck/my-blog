@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
 	_log "github.com/butterneck/my-blog/src/log"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"github.com/butterneck/my-blog/src/db"
@@ -28,15 +29,15 @@ func init() {
 
 	r := gin.Default()
 	r.Use(gin.Recovery())
+	r.Use(cors.Default()) // TODO: Remove
 
 	v1 := r.Group("/api/v1")
 	{
 		v1.GET("/posts", GetPosts)
-		v1.GET("/posts/:id", GetPost)
+		v1.GET("/posts/:slug", GetPostBySlug)
 		v1.POST("/posts", CreatePost)
 		v1.PUT("/posts/:id", UpdatePost)
 		v1.DELETE("/posts/:id", DeletePost)
-
 	}
 
 	ginLambda = ginadapter.New(r)

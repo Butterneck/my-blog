@@ -182,7 +182,7 @@ func GetPersistedPosts(ctx context.Context, log *zap.SugaredLogger, filter PostF
 	return posts, nil
 }
 
-func GetPersistedPost(ctx context.Context, log *zap.SugaredLogger, id PostId) (*Post, error) {
+func GetPersistedPostById(ctx context.Context, log *zap.SugaredLogger, id PostId) (*Post, error) {
 	log.Debugf("Get persisted post with id: %s", id)
 	db := db.GetDB(log)
 	resp, err := db.GetItem(ctx, &dynamodb.GetItemInput{
@@ -192,7 +192,7 @@ func GetPersistedPost(ctx context.Context, log *zap.SugaredLogger, id PostId) (*
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("getPersistedPost - db.GetItem - error: %v", err)
+		return nil, fmt.Errorf("getPersistedPostById - db.GetItem - error: %v", err)
 	}
 
 	if resp.Item == nil {
@@ -202,7 +202,46 @@ func GetPersistedPost(ctx context.Context, log *zap.SugaredLogger, id PostId) (*
 	var post Post
 	err = attributevalue.UnmarshalMap(resp.Item, &post)
 	if err != nil {
-		return nil, fmt.Errorf("getPersistedPost - attributevalue.UnmarshalMap - error: %v", err)
+		return nil, fmt.Errorf("getPersistedPostById - attributevalue.UnmarshalMap - error: %v", err)
+	}
+
+	return &post, nil
+}
+
+func GetPersistedPostBySlug(ctx context.Context, log *zap.SugaredLogger, slug string) (*Post, error) {
+	log.Debugf("Get persisted post with slug: %s", slug)
+	db := db.GetDB(log)
+	resp, err := db.Query(ctx, &dynamodb.QueryInput{
+		TableName:              aws.String("Posts"),
+		IndexName:              aws.String("slug-index"),
+		KeyConditionExpression: aws.String("slug = :slug"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":slug": &types.AttributeValueMemberS{Value: string(slug)},
+		},
+	})
+
+	// resp, err := db.GetItem(ctx, &dynamodb.GetItemInput{
+	// 	TableName: aws.String("Posts"),
+	// 	Key: map[string]types.AttributeValue{
+	// 		"slug": &types.AttributeValueMemberS{Value: string(slug)},
+	// 	},
+	// })
+	if err != nil {
+		return nil, fmt.Errorf("getPersistedPostBySlug - db.Query - error: %v", err)
+	}
+
+	if len(resp.Items) == 0 {
+		return nil, fmt.Errorf("getPersistedPostBySlug - db.Query - error: no post with slug `%s`", slug)
+	}
+
+	if len(resp.Items) > 1 {
+		return nil, fmt.Errorf("getPersistedPostBySlug - db.Query - error: more than one post with slug `%s`", slug)
+	}
+
+	var post Post
+	err = attributevalue.UnmarshalMap(resp.Items[0], &post)
+	if err != nil {
+		return nil, fmt.Errorf("getPersistedPostBySlug - attributevalue.UnmarshalMap - error: %v", err)
 	}
 
 	return &post, nil
