@@ -1,10 +1,11 @@
 import { envVariables } from "$lib/envVariables";
-import { getPosts } from '$lib/getPosts'
+// import { getPosts } from '$lib/getPosts'
 
 export async function get() {
-  const response = getPosts()
+  // const response = getPosts()
 
-  const body = xml(response.body.posts)
+  // const body = xml(response.body.posts)
+  const body = xml([{}])
 
   const headers = {
     'Cache-Control': 'max-age=0, s-maxage=3600',
@@ -18,14 +19,14 @@ export async function get() {
 
 
 const xml =
-  posts => `<rss xmlns:dc="https://purl.org/dc/elements/1.1/" xmlns:content="https://purl.org/rss/1.0/modules/content/" xmlns:atom="https://www.w3.org/2005/Atom" version="2.0">
+  (  posts: any[]) => `<rss xmlns:dc="https://purl.org/dc/elements/1.1/" xmlns:content="https://purl.org/rss/1.0/modules/content/" xmlns:atom="https://www.w3.org/2005/Atom" version="2.0">
   <channel>
     <title>K-Sato</title>
     <link>${envVariables.basePath}</link>
     <description>A blog built with SvelteKit about tech and stuff!</description>
     ${posts
       .map(
-        post =>
+        (        post: { title: any; description: any; slug: any; date: string | number | Date; }) =>
           `
         <item>
           <title>${post.title}</title>

@@ -1,27 +1,21 @@
-import preprocess from "svelte-preprocess";
-import adapter from "@sveltejs/adapter-static";
-import { resolve } from "path";
+import adapter from '@sveltejs/adapter-auto';
+import { vitePreprocess } from '@sveltejs/kit/vite';
 
+/** @type {import('@sveltejs/kit').Config} */
 const config = {
-  // Consult https://github.com/sveltejs/svelte-preprocess
-  // for more information about preprocessors
-  preprocess: preprocess(),
-  vite: {
-    resolve: {
-      alias: {
-        $data: resolve("./src/data"),
-      },
-    },
-  },
-  kit: {
-    adapter: adapter({
-      fallback: "index.html",
-    }),
-    alias: {
-      $lib: "src/lib",
-      $data: "src/data",
-    },
-  },
+	// Consult https://kit.svelte.dev/docs/integrations#preprocessors
+	// for more information about preprocessors
+	preprocess: vitePreprocess(),
+
+	kit: {
+		adapter: adapter({
+		  fallback: "index.html",
+		}),
+		alias: {
+		  $lib: "src/lib",
+		  $data: "src/data",
+		},
+	  },
 };
 
 export default config;

@@ -7,3 +7,8 @@ interface Post {
   slug: string;
   tags: string[];
 }
+
+interface NewPost {
+  title: string;
+  body: string,
+}
