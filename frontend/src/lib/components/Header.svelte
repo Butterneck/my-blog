@@ -12,6 +12,9 @@
       <a href="/about" class="header__links__item__link">About</a>
     </li>
     <li class="header__links_item">
+      <a href="/new" class="header__links__item__link">New Post</a>
+    </li>
+    <li class="header__links_item">
       <a href="/login" class="header__links__item__link">Login</a>
     </li>
   </ul>

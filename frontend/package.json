@@ -33,6 +33,7 @@
 	"dependencies": {
 		"@auth/core": "^0.18.3",
 		"@auth/sveltekit": "^0.3.14",
+		"@sveltejs/adapter-static": "^2.0.3",
 		"aws-amplify": "^6.0.5",
 		"fecha": "^4.2.3",
 		"highlight.js": "^11.9.0",

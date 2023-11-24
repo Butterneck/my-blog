@@ -2,14 +2,12 @@ resource "aws_api_gateway_rest_api" "api" {
   name        = "blog-api"
   description = "API for blog"
 
-  api_key_source = "HEADER"
-
   body = templatefile("${path.module}/../src/blog-backend/openapi.yaml", {
     backend_lambda_arn    = aws_lambda_function.blog_backend.arn
     cognito_user_pool_arn = aws_cognito_user_pool.pool.arn
   })
 
-  disable_execute_api_endpoint = false # TODO: change to true when connecting to a custom domain
+  disable_execute_api_endpoint = true
 }
 
 

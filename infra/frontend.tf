@@ -95,17 +95,16 @@ resource "aws_cloudfront_distribution" "blog_frontend" {
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = local.api_origin_id
 
-    forwarded_values {
-      query_string = true
+    # Managed-CORS-with-preflight-and-SecurityHeadersPolicy
+    response_headers_policy_id = "eaab4381-ed33-4a86-88ca-d9558dc6cd63"
 
-      cookies {
-        forward = "none"
-      }
-    }
+    # Managed-AllViewerExceptHostHeader
+    origin_request_policy_id = "b689b0a8-53d0-40ab-baf2-68738e2966ac"
+
+    # Managed-CachingDisabled
+    cache_policy_id = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+
     viewer_protocol_policy = "https-only"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
   }
 
   price_class = "PriceClass_100"
