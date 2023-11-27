@@ -1,3 +1,13 @@
+terraform {
+  required_providers {
+    aws = {
+      source                = "hashicorp/aws"
+      version               = ">= 5.26.0"
+      configuration_aliases = [aws.main, aws.us_east_1]
+    }
+  }
+}
+
 resource "aws_cloudfront_distribution" "this" {
 
   aliases = []
@@ -7,7 +17,7 @@ resource "aws_cloudfront_distribution" "this" {
     content {
       domain_name              = origin.value.domain_name
       origin_id                = origin.value.id
-      origin_access_control_id = origin.value.origin_access_control_id
+      origin_access_control_id = aws_cloudfront_origin_access_control.blog_frontend.id
       origin_path              = origin.value.origin_path
     }
   }
@@ -124,11 +134,11 @@ resource "aws_cloudfront_origin_access_control" "blog_frontend" {
 # Certificates #
 ################
 module "acm_certificate" {
-  source = "./modules/base/acm-certificate"
+  source = "./../acm-certificate"
 
   domain_name            = var.domain_names[0]
   alternative_names      = slice(var.domain_names, 1, length(var.domain_names) - 1)
-  zone_id                = var.domain_names_zone
+  hosted_zone_name       = var.domain_names_zone
   is_hosted_zone_private = false
 }
 
@@ -137,10 +147,10 @@ module "acm_certificate" {
 ###############
 module "r53_records" {
   for_each = toset(var.domain_names)
-  source   = "./modules/base/cloudfront-dns-record"
+  source   = "./../cloudfront-dns-record"
 
-  name    = each.value
-  zone_id = var.domain_names_zone
+  name             = each.value
+  hosted_zone_name = var.domain_names_zone
 
   cloudfront_distribution_id = resource.aws_cloudfront_distribution.this.id
 }
@@ -149,15 +159,15 @@ module "r53_records" {
 # S3 origins #
 ##############
 data "aws_s3_bucket" "s3_origin" {
-    for_each = { for s3_origin in var.s3_origins : s3_origin.bucket_name => s3_origin }
-    bucket   = each.value.bucket_name
+  for_each = { for s3_origin in var.s3_origins : s3_origin.bucket_name => s3_origin }
+  bucket   = each.value.bucket_name
 }
 
 ##################
 # S3 permissions #
 ##################
 data "aws_iam_policy_document" "s3_policy" {
-  for_each =  { for s3_origin in var.s3_origins : s3_origin.bucket_name => s3_origin }
+  for_each = { for s3_origin in var.s3_origins : s3_origin.bucket_name => s3_origin }
   statement {
     actions   = ["s3:GetObject"]
     resources = ["${data.aws_s3_bucket.s3_origin["s3_origin.bucket_name"].arn}/*"]
@@ -174,7 +184,7 @@ data "aws_iam_policy_document" "s3_policy" {
 }
 
 resource "aws_s3_bucket_policy" "allow_cloudfront_read" {
-    for_each =  { for s3_origin in var.s3_origins : s3_origin.bucket_name => s3_origin }
-    bucket   = data.aws_s3_bucket.s3_origin["s3_origin.bucket_name"].id
-    policy   = data.aws_iam_policy_document.s3_policy["s3_origin.bucket_name"].json
+  for_each = { for s3_origin in var.s3_origins : s3_origin.bucket_name => s3_origin }
+  bucket   = data.aws_s3_bucket.s3_origin["s3_origin.bucket_name"].id
+  policy   = data.aws_iam_policy_document.s3_policy["s3_origin.bucket_name"].json
 }

@@ -12,10 +12,9 @@ variable "domain_names_zone" {
 
 variable "s3_origins" {
   type = list(map(object({
-    id                       = string
-    bucket_name              = string
-    origin_access_control_id = string
-    origin_path              = string
+    id          = string
+    bucket_name = string
+    origin_path = string
   })))
   description = "The s3 origins for the CloudFront distribution. The first origin is the default origin."
   default     = []
