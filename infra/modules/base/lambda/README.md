@@ -1,0 +1,1 @@
+Terraform module that deploys a lambda function, managing code dependencies and build
