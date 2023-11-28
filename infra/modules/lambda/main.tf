@@ -45,7 +45,7 @@ data "aws_iam_policy_document" "assume_role" {
     condition {
       test     = "StringEquals"
       variable = "aws:SourceArn"
-      values   = ["arn:${data.aws_partition.current}:lambda:${data.aws_region.current}:${data.aws_caller_identity.current}:function:${local.role_name}"]
+      values   = ["arn:${data.aws_partition.current.id}:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${local.role_name}"]
     }
   }
 }
@@ -84,7 +84,7 @@ resource "aws_iam_role_policy" "logs" {
 
 # Grant read write access to DynamoDB table
 resource "aws_iam_role_policy" "dynamodb_read" {
-  count = var.dynamodb_table_arn != null ? 1 : 0
+  count = var.has_dynamodb_table ? 1 : 0
   name  = "dynamodb_read"
   role  = aws_iam_role.lambda.id
   policy = jsonencode({

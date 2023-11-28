@@ -15,3 +15,8 @@ variable "user_pool_arn" {
   description = "ARN of the existing Cognito User Pool to use for authentication (if needed)"
   default     = ""
 }
+
+variable "backend_lambda_arn" {
+  type        = string
+  description = "ARN of the existing Lambda function to use as backend"
+}

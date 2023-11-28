@@ -10,11 +10,11 @@ terraform {
 resource "aws_route53_record" "this" {
   name    = var.name
   type    = "A"
-  zone_id = aws_route53_zone.selected.zone_id
+  zone_id = data.aws_route53_zone.selected.zone_id
 
   alias {
-    name                   = aws_cloudfront_distribution.selected.domain_name
-    zone_id                = aws_cloudfront_distribution.selected.hosted_zone_id
+    name                   = data.aws_cloudfront_distribution.selected.domain_name
+    zone_id                = data.aws_cloudfront_distribution.selected.hosted_zone_id
     evaluate_target_health = true
   }
 }

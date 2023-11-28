@@ -37,3 +37,9 @@ variable "dynamodb_table_arn" {
   type        = string
   default     = null
 }
+
+variable "has_dynamodb_table" {
+  description = "Whether the Lambda function needs access to a DynamoDB table (needed explicitly because Terraform cannot detect if the DynamoDB table exists)"
+  type        = bool
+  default     = false
+}

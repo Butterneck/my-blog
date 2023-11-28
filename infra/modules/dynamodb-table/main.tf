@@ -54,18 +54,18 @@ resource "aws_dynamodb_table" "this" {
 }
 
 # EventBridge bus where cdc events will be published
-resource "aws_cloudwatch_event_bus" "event_bus" {
+resource "aws_cloudwatch_event_bus" "cdc_bus" {
   count = var.expose_cdc_events ? 1 : 0
-  name  = name
+  name  = var.name
 }
 
 # EventBridge pipe to forward update events to the event bus
 resource "aws_pipes_pipe" "forward_cdc" {
   count    = var.expose_cdc_events ? 1 : 0
   name     = var.name
-  role_arn = aws_iam_role.forward_pipe_execution_role.arn
+  role_arn = aws_iam_role.pipe[0].arn
   source   = aws_dynamodb_table.this.stream_arn
-  target   = resource.aws_cloudwatch_event_bus.cdc_bus.arn
+  target   = aws_cloudwatch_event_bus.cdc_bus[0].arn
 
   source_parameters {
     dynamodb_stream_parameters {
@@ -92,8 +92,8 @@ resource "aws_iam_role" "pipe" {
         },
         Condition = {
           StringEquals = {
-            "aws:SourceAccount" : data.aws_caller_identity.main.account_id
-            "aws:SourceArn" : "arn:aws:pipes:${data.aws_region.current}:${data.aws_caller_identity.current.account_id}:pipe/${var.name}"
+            "aws:SourceAccount" : data.aws_caller_identity.current.account_id
+            "aws:SourceArn" : "arn:aws:pipes:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:pipe/${var.name}"
           }
         }
       }
@@ -104,7 +104,7 @@ resource "aws_iam_role" "pipe" {
 resource "aws_iam_role_policy" "pipe_execution_role_ddb_read" {
   count = var.expose_cdc_events ? 1 : 0
   name  = "DynamoDBStreamRead"
-  role  = aws_iam_role.forward_cdc_pipe_execution_role.id
+  role  = aws_iam_role.pipe[0].id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -125,7 +125,7 @@ resource "aws_iam_role_policy" "pipe_execution_role_ddb_read" {
 resource "aws_iam_role_policy" "pipe_execution_role_eventbridge_write" {
   count = var.expose_cdc_events ? 1 : 0
   name  = "EventBridgeWrite"
-  role  = aws_iam_role.forward_cdc_pipe_execution_role.id
+  role  = aws_iam_role.pipe[0].id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -134,7 +134,7 @@ resource "aws_iam_role_policy" "pipe_execution_role_eventbridge_write" {
           "events:PutEvents"
         ]
         Effect   = "Allow"
-        Resource = resource.aws_cloudwatch_event_bus.cdc_bus.arn
+        Resource = aws_cloudwatch_event_bus.cdc_bus[0].arn
       },
     ]
   })

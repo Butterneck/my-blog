@@ -14,7 +14,7 @@ data "aws_region" "current" {}
 ###################
 
 module "ecr_repository" {
-  source = "./ecr-private-repository"
+  source = "./../ecr-private-repository"
   name   = var.name
 }
 
@@ -24,13 +24,14 @@ resource "aws_lambda_permission" "api_gateway" {
   function_name = module.lambda.name
   principal     = "apigateway.amazonaws.com"
 
-  source_arn = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
+  source_arn = "${module.rest_api.execution_arn}/*/*"
 }
 
 module "lambda" {
   source             = "./../lambda"
   name               = var.name
-  dynamodb_table_arn = module.dynamodb_table.arn
+  dynamodb_table_arn = module.dynamodb_table[0].arn
+  has_dynamodb_table = var.dynamodb_config != null
   image_uri          = var.backend_image_uri
 }
 
@@ -54,8 +55,9 @@ module "dynamodb_table" {
 # Rest API #
 ############
 module "rest_api" {
-  source            = "./../rest-api-gateway"
-  name              = var.name
-  openapi_file_path = var.openapi_file_path
-  user_pool_arn     = var.existing_user_pool_arn
+  source             = "./../rest-api-gateway"
+  name               = var.name
+  openapi_file_path  = var.openapi_file_path
+  user_pool_arn      = var.existing_user_pool_arn
+  backend_lambda_arn = module.lambda.arn
 }

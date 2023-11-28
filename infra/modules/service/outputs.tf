@@ -1,15 +1,11 @@
-# api_id
-# stage_name
-# region
-
 output "api_id" {
-  value = aws_api_gateway_rest_api.this.id
+  value = module.rest_api.api_id
 }
 
-output "stage_name" {
-  value = aws_api_gateway_stage.this.stage_name
+output "api_stage_name" {
+  value = module.rest_api.stage_name
 }
 
-output "region" {
-  value = data.aws_region.current.name
+output "api_region" {
+  value = module.rest_api.region
 }

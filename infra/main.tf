@@ -1,16 +1,18 @@
 provider "aws" {
+  alias = "euw1"
   region = "eu-west-1"
 }
 
 provider "aws" {
-  alias  = "us-east-1"
+  alias  = "use1"
   region = "us-east-1"
 }
 
 module "blog_backend" {
   source = "./modules/service"
-  name   = "blog-backend"
+  name   = var.name
   dynamodb_config = {
+    name = var.name
     attributes = [
       {
         name = "id"
@@ -43,7 +45,7 @@ module "blog_backend" {
 
 module "blog_frontend" {
   source = "./modules/s3-bucket"
-  name   = "butterneck-blog-frontend"
+  name   = var.name
 }
 
 module "dns_zone" {
@@ -53,23 +55,29 @@ module "dns_zone" {
 
 module "cdn" {
   source            = "./modules/cdn"
+  providers = {
+    aws.main = aws.euw1
+    aws.use1 = aws.use1
+  }
+
   domain_names      = [local.blog_domain]
   domain_names_zone = local.blog_domain
-  s3_origins = [
-    {
-      id          = "frontend"
+  s3_origins = {
+    "default" = {
       bucket_name = module.blog_frontend.name
-      origin_path = ""
+      domain_name = module.blog_frontend.regional_domain_name
+      origin_path = "/"
     }
-  ]
-  apigw_origins = [
-    {
-      id          = "backend"
+  }
+  apigw_origins = {
+    backend = {
       rest_api_id = module.blog_backend.api_id
-      stage_name  = module.blog_backend.stage_name
-      region      = module.blog_backend.region
+      stage_name  = module.blog_backend.api_stage_name
+      region      = module.blog_backend.api_region
     }
-  ]
+  }
+
+  depends_on = [ module.dns_zone, module.blog_frontend, module.blog_backend ]
 }
 
 ######################
@@ -77,5 +85,5 @@ module "cdn" {
 ######################
 module "user_pool" {
   source = "./modules/cognito-user-pool"
-  name   = "butterneck-blog-user-pool"
+  name   = var.name
 }

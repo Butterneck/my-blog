@@ -3,7 +3,7 @@ terraform {
     aws = {
       source                = "hashicorp/aws"
       version               = ">= 5.26.0"
-      configuration_aliases = [aws.main, aws.us_east_1]
+      configuration_aliases = [aws.main, aws.use1]
     }
   }
 }
@@ -16,7 +16,7 @@ resource "aws_cloudfront_distribution" "this" {
     for_each = var.s3_origins
     content {
       domain_name              = origin.value.domain_name
-      origin_id                = origin.value.id
+      origin_id                = origin.key
       origin_access_control_id = aws_cloudfront_origin_access_control.blog_frontend.id
       origin_path              = origin.value.origin_path
     }
@@ -25,8 +25,8 @@ resource "aws_cloudfront_distribution" "this" {
   dynamic "origin" {
     for_each = var.apigw_origins
     content {
-      domain_name = "${origin.value.rest_api_id}.execute-api.${origin.value.region}.amazonaws.com"
-      origin_id   = origin.value.id
+      domain_name = "${origin.key}.execute-api.${origin.value.region}.amazonaws.com"
+      origin_id   = origin.key
       origin_path = origin.value.stage_name
 
       custom_origin_config {
@@ -47,7 +47,7 @@ resource "aws_cloudfront_distribution" "this" {
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "DELETE", "PATCH"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id = s3_origins[0].id
+    target_origin_id = "default"
 
     # Managed-CachingOptimized
     cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
@@ -61,10 +61,10 @@ resource "aws_cloudfront_distribution" "this" {
   dynamic "ordered_cache_behavior" {
     for_each = var.apigw_origins
     content {
-      path_pattern     = ordered_cache_behavior.value.path_pattern
+      path_pattern     = ordered_cache_behavior.value.stage_name
       allowed_methods  = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "DELETE", "PATCH"]
       cached_methods   = ["GET", "HEAD", "OPTIONS"]
-      target_origin_id = ordered_cache_behavior.value.id
+      target_origin_id = ordered_cache_behavior.key
 
       #   # Managed-CORS-with-preflight-and-SecurityHeadersPolicy
       #   response_headers_policy_id = "eaab4381-ed33-4a86-88ca-d9558dc6cd63"
@@ -93,12 +93,14 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   dynamic "ordered_cache_behavior" {
-    for_each = slice(var.s3_origins, 1, length(var.s3_origins) - 1)
+    for_each = {
+      for id, s3_origin in var.s3_origins : id => s3_origin if id != "default"
+    }
     content {
       allowed_methods  = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "DELETE", "PATCH"]
       cached_methods   = ["GET", "HEAD", "OPTIONS"]
-      target_origin_id = s3_origins[0].id
-      path_pattern     = ordered_cache_behavior.value.path_pattern
+      target_origin_id = ordered_cache_behavior.key
+      path_pattern     = ordered_cache_behavior.value.origin_path
 
       # Managed-CachingOptimized
       cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
@@ -124,7 +126,7 @@ resource "aws_cloudfront_distribution" "this" {
 }
 
 resource "aws_cloudfront_origin_access_control" "blog_frontend" {
-  name                              = aws_cloudfront_distribution.this.id
+  name                              = var.domain_names[0]
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
@@ -137,7 +139,7 @@ module "acm_certificate" {
   source = "./../acm-certificate"
 
   domain_name            = var.domain_names[0]
-  alternative_names      = slice(var.domain_names, 1, length(var.domain_names) - 1)
+  alternative_names      = length(var.domain_names) > 1 ? slice(var.domain_names, 1, length(var.domain_names) - 1) : []
   hosted_zone_name       = var.domain_names_zone
   is_hosted_zone_private = false
 }
@@ -159,7 +161,7 @@ module "r53_records" {
 # S3 origins #
 ##############
 data "aws_s3_bucket" "s3_origin" {
-  for_each = { for s3_origin in var.s3_origins : s3_origin.bucket_name => s3_origin }
+  for_each = var.s3_origins
   bucket   = each.value.bucket_name
 }
 
@@ -167,10 +169,10 @@ data "aws_s3_bucket" "s3_origin" {
 # S3 permissions #
 ##################
 data "aws_iam_policy_document" "s3_policy" {
-  for_each = { for s3_origin in var.s3_origins : s3_origin.bucket_name => s3_origin }
+  for_each = var.s3_origins
   statement {
     actions   = ["s3:GetObject"]
-    resources = ["${data.aws_s3_bucket.s3_origin["s3_origin.bucket_name"].arn}/*"]
+    resources = ["${data.aws_s3_bucket.s3_origin[each.key].arn}/*"]
     principals {
       type        = "Service"
       identifiers = ["cloudfront.amazonaws.com"]
@@ -181,10 +183,11 @@ data "aws_iam_policy_document" "s3_policy" {
       values   = [aws_cloudfront_distribution.this.arn]
     }
   }
+
 }
 
-resource "aws_s3_bucket_policy" "allow_cloudfront_read" {
-  for_each = { for s3_origin in var.s3_origins : s3_origin.bucket_name => s3_origin }
-  bucket   = data.aws_s3_bucket.s3_origin["s3_origin.bucket_name"].id
-  policy   = data.aws_iam_policy_document.s3_policy["s3_origin.bucket_name"].json
-}
+# resource "aws_s3_bucket_policy" "allow_cloudfront_read" {
+#   for_each = { for s3_origin in var.s3_origins : s3_origin.bucket_name => s3_origin }
+#   bucket   = data.aws_s3_bucket.s3_origin["s3_origin.bucket_name"].id
+#   policy   = data.aws_iam_policy_document.s3_policy["s3_origin.bucket_name"].json
+# }
