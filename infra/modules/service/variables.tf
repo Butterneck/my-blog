@@ -29,5 +29,5 @@ variable "dynamodb_config" {
 
 variable "backend_image_uri" {
   type        = string
-  description = "URI of the Docker image to use for the Lambda function"
+  description = "The ECR image URI containing the backend's deployment package."
 }

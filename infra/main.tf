@@ -1,5 +1,5 @@
 provider "aws" {
-  alias = "euw1"
+  alias  = "euw1"
   region = "eu-west-1"
 }
 
@@ -8,11 +8,22 @@ provider "aws" {
   region = "us-east-1"
 }
 
+#############################################################
+# DNS Zone that manages all the DNS records for the project #
+#############################################################
+module "dns_zone" {
+  source = "./modules/hosted-zone"
+  name   = local.blog_domain
+}
+
+################
+# Blog Backend #
+################
 module "blog_backend" {
   source = "./modules/service"
-  name   = var.name
+  name   = "${local.name}-backend"
   dynamodb_config = {
-    name = var.name
+    name = local.name
     attributes = [
       {
         name = "id"
@@ -38,23 +49,24 @@ module "blog_backend" {
     ]
     expose_cdc_events = true
   }
-  openapi_file_path = var.backend_openapi_file_path
-  backend_image_uri = var.backend_image_uri
+  openapi_file_path      = local.backend_openapi_file_path
+  backend_image_uri      = var.backend_image_uri
   existing_user_pool_arn = module.user_pool.arn
 }
 
+#################
+# Blog Frontend #
+#################
 module "blog_frontend" {
   source = "./modules/s3-bucket"
-  name   = var.name
+  name   = "${local.name}-frontend"
 }
 
-module "dns_zone" {
-  source = "./modules/hosted-zone"
-  name   = local.blog_domain
-}
-
+#############################################
+# CDN for both the frontend and the backend #
+#############################################
 module "cdn" {
-  source            = "./modules/cdn"
+  source = "./modules/cdn"
   providers = {
     aws.main = aws.euw1
     aws.use1 = aws.use1
@@ -77,13 +89,29 @@ module "cdn" {
     }
   }
 
-  depends_on = [ module.dns_zone, module.blog_frontend, module.blog_backend ]
+  depends_on = [module.dns_zone, module.blog_frontend, module.blog_backend]
 }
 
-######################
-# Cognito User Pool #
-######################
+#####################################################
+# Cognito User Pool used for backend authentication #
+#####################################################
 module "user_pool" {
   source = "./modules/cognito-user-pool"
-  name   = var.name
+  name   = local.name
+}
+
+
+#####################
+# Cache invalidator #
+#####################
+module "cache_invalidator" {
+  source    = "./modules/event-bridge-lambda"
+  name      = "${local.name}-cache-invalidator"
+  image_uri = var.cache_invalidator_image_uri
+  event_bus_name = module.blog_backend.ddb_cdc_bus_name
+  event_pattern = jsonencode({
+    source = [
+      "Pipe ${module.blog_backend.ddb_cdc_pipe_name}"
+    ]
+  })
 }

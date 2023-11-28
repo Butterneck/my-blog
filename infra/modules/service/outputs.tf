@@ -9,3 +9,11 @@ output "api_stage_name" {
 output "api_region" {
   value = module.rest_api.region
 }
+
+output "ddb_cdc_bus_name" {
+    value = module.dynamodb_table[0].cdc_bus_name
+}
+
+output "ddb_cdc_pipe_name" {
+    value = module.dynamodb_table[0].cdc_pipe_name
+}
