@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -111,7 +112,7 @@ func PersistNewPost(ctx context.Context, log *zap.SugaredLogger, post *Post) (er
 
 	db := db.GetDB(log)
 	_, err = db.PutItem(ctx, &dynamodb.PutItemInput{
-		TableName:           aws.String("Posts"),
+		TableName:           aws.String(os.Getenv("DYNAMODB_TABLE_NAME")),
 		Item:                item,
 		ConditionExpression: aws.String("attribute_not_exists(id)"),
 	})
@@ -131,7 +132,7 @@ func PersistUpdatedPost(ctx context.Context, log *zap.SugaredLogger, post *Post)
 
 	db := db.GetDB(log)
 	_, err = db.PutItem(ctx, &dynamodb.PutItemInput{
-		TableName:           aws.String("Posts"),
+		TableName:           aws.String(os.Getenv("DYNAMODB_TABLE_NAME")),
 		Item:                item,
 		ConditionExpression: aws.String("attribute_exists(id)"),
 	})
@@ -151,7 +152,7 @@ func PersistPost(ctx context.Context, log *zap.SugaredLogger, post *Post) (err e
 
 	db := db.GetDB(log)
 	_, err = db.PutItem(ctx, &dynamodb.PutItemInput{
-		TableName: aws.String("Posts"),
+		TableName: aws.String(os.Getenv("DYNAMODB_TABLE_NAME")),
 		Item:      item,
 	})
 	if err != nil {
@@ -167,7 +168,7 @@ func GetPersistedPosts(ctx context.Context, log *zap.SugaredLogger, filter PostF
 	log.Debugf("Get persisted posts with filter: %v", filter)
 	db := db.GetDB(log)
 	resp, err := db.Scan(ctx, &dynamodb.ScanInput{
-		TableName: aws.String("Posts"),
+		TableName: aws.String(os.Getenv("DYNAMODB_TABLE_NAME")),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("getPersistedPosts - db.Scan - error: %v", err)
@@ -186,7 +187,7 @@ func GetPersistedPostById(ctx context.Context, log *zap.SugaredLogger, id PostId
 	log.Debugf("Get persisted post with id: %s", id)
 	db := db.GetDB(log)
 	resp, err := db.GetItem(ctx, &dynamodb.GetItemInput{
-		TableName: aws.String("Posts"),
+		TableName: aws.String(os.Getenv("DYNAMODB_TABLE_NAME")),
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: string(id)},
 		},
@@ -212,7 +213,7 @@ func GetPersistedPostBySlug(ctx context.Context, log *zap.SugaredLogger, slug st
 	log.Debugf("Get persisted post with slug: %s", slug)
 	db := db.GetDB(log)
 	resp, err := db.Query(ctx, &dynamodb.QueryInput{
-		TableName:              aws.String("Posts"),
+		TableName:              aws.String(os.Getenv("DYNAMODB_TABLE_NAME")),
 		IndexName:              aws.String("slug-index"),
 		KeyConditionExpression: aws.String("slug = :slug"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
@@ -276,7 +277,7 @@ func DeletePersistedPost(ctx context.Context, log *zap.SugaredLogger, id PostId)
 	log.Debugf("Delete post `%s`", id)
 	db := db.GetDB(log)
 	_, err := db.DeleteItem(ctx, &dynamodb.DeleteItemInput{
-		TableName: aws.String("Posts"),
+		TableName: aws.String(os.Getenv("DYNAMODB_TABLE_NAME")),
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: string(id)},
 		},

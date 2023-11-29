@@ -17,13 +17,12 @@ variable "image_uri" {
 variable "image_config_entry_point" {
   description = "The ENTRYPOINT for the docker image"
   type        = list(string)
-  default     = []
-
+  default     = null
 }
 variable "image_config_command" {
   description = "The CMD for the docker image"
   type        = list(string)
-  default     = []
+  default     = null
 }
 
 variable "image_config_working_directory" {
@@ -34,6 +33,12 @@ variable "image_config_working_directory" {
 
 variable "dynamodb_table_arn" {
   description = "ARN of the DynamoDB table to which the Lambda function needs access"
+  type        = string
+  default     = null
+}
+
+variable "dynamodb_table_name" {
+  description = "Name of the DynamoDB table to which the Lambda function needs access"
   type        = string
   default     = null
 }

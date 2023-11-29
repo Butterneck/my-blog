@@ -17,7 +17,7 @@ variable "hosted_zone_name" {
 variable "is_hosted_zone_private" {
   type        = bool
   description = "Is hosted zone private"
-  default     = true
+  default     = false
 }
 
 variable "region" {

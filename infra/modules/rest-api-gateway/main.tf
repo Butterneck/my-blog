@@ -8,7 +8,11 @@ resource "aws_api_gateway_rest_api" "this" {
     cognito_user_pool_arn = var.user_pool_arn
   })
 
-  disable_execute_api_endpoint = true
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+
+  # disable_execute_api_endpoint = true
 }
 
 resource "aws_api_gateway_deployment" "this" {
@@ -27,4 +31,17 @@ resource "aws_api_gateway_stage" "main" {
   deployment_id = aws_api_gateway_deployment.this.id
   rest_api_id   = aws_api_gateway_rest_api.this.id
   stage_name    = "main"
+}
+
+
+# Enable logging and metrics for all methods
+resource "aws_api_gateway_method_settings" "all" {
+  rest_api_id = aws_api_gateway_rest_api.this.id
+  stage_name  = aws_api_gateway_stage.main.stage_name
+  method_path = "*/*"
+
+  settings {
+    metrics_enabled = true
+    logging_level   = "INFO"
+  }
 }

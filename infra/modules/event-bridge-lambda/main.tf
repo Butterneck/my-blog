@@ -13,6 +13,7 @@ resource "aws_cloudwatch_event_rule" "rule" {
 resource "aws_cloudwatch_event_target" "target" {
     rule = aws_cloudwatch_event_rule.rule.name
     arn = module.lambda.arn
+    event_bus_name = var.event_bus_name
 }
 
 resource "aws_lambda_permission" "permission" {

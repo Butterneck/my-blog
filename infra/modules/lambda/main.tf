@@ -28,6 +28,12 @@ resource "aws_lambda_function" "this" {
     command           = var.image_config_command
     working_directory = var.image_config_working_directory
   }
+
+  environment {
+    variables = {
+      DYNAMODB_TABLE_NAME = var.dynamodb_table_name
+    }
+  }
 }
 
 #######
@@ -45,7 +51,7 @@ data "aws_iam_policy_document" "assume_role" {
     condition {
       test     = "StringEquals"
       variable = "aws:SourceArn"
-      values   = ["arn:${data.aws_partition.current.id}:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${local.role_name}"]
+      values   = ["arn:${data.aws_partition.current.id}:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.name}"]
     }
   }
 }
@@ -76,14 +82,14 @@ resource "aws_iam_role_policy" "logs" {
           "logs:PutLogEvents",
         ]
         Effect   = "Allow"
-        Resource = aws_cloudwatch_log_group.lambda.arn
+        Resource = "${aws_cloudwatch_log_group.lambda.arn}:*"
       },
     ]
   })
 }
 
 # Grant read write access to DynamoDB table
-resource "aws_iam_role_policy" "dynamodb_read" {
+resource "aws_iam_role_policy" "dynamodb_read_write" {
   count = var.has_dynamodb_table ? 1 : 0
   name  = "dynamodb_read"
   role  = aws_iam_role.lambda.id
