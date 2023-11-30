@@ -3,21 +3,21 @@
 	import { signInWithRedirect } from 'aws-amplify/auth';
 	import { signOut } from 'aws-amplify/auth';
 	import { getCurrentUser } from '$lib/auth';
+	import { Hub } from 'aws-amplify/utils';
 
-	let userLoggedIn = false;
+	// @ts-ignore
+	const listener = (data) => {
+		console.log(data);
+	};
 
-	async function load() {
-		userLoggedIn = getCurrentUser() !== null;
-	}
+	Hub.listen('auth', listener);
 
 	async function handleLogin() {
 		await signInWithRedirect();
-		userLoggedIn = getCurrentUser() !== null;
 	}
 
 	async function handleLogout() {
 		await signOut();
-		userLoggedIn = getCurrentUser() !== null;
 	}
 </script>
 
@@ -33,17 +33,12 @@
 		<li class="header__links_item">
 			<a href="/new" class="header__links__item__link">New Post</a>
 		</li>
-
-		<!-- TODO: Show login or logout button -->
-		{#if userLoggedIn}
-			<li class="header__links_item">
-				<span class="header__links__item__link" on:click={handleLogout}>Logout</span>
-			</li>
-		{:else}
-			<li class="header__links_item">
-				<span class="header__links__item__link" on:click={handleLogin}>Login</span>
-			</li>
-		{/if}
+		<li class="header__links_item">
+			<span class="header__links__item__link" on:click={handleLogout}>Logout</span>
+		</li>
+		<li class="header__links_item">
+			<span class="header__links__item__link" on:click={handleLogin}>Login</span>
+		</li>
 	</ul>
 </nav>
 

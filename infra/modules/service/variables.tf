@@ -20,8 +20,9 @@ variable "dynamodb_config" {
     attributes               = list(map(string))
     hash_key                 = string
     range_key                = string
-    global_secondary_indexes = any
+    global_secondary_indexes = optional(any)
     expose_cdc_events        = bool
+    eventbridge_bus_name     = optional(string)
   })
   description = "Configuration for the DynamoDB table"
   default = null

@@ -7,7 +7,7 @@ output "name" {
 }
 
 output "cdc_bus_name" {
-    value = aws_cloudwatch_event_bus.cdc_bus[0].name
+    value = local.eventbridge_bus_name
 }
 
 output "cdc_pipe_name" {

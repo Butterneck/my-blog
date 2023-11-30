@@ -33,3 +33,9 @@ variable "expose_cdc_events" {
   description = "Whether to expose DynamoDB CDC events to a custom event bus"
   default     = false
 }
+
+variable "eventbridge_bus_name" {
+  type        = string
+  description = "Name of the custom event bus to expose DynamoDB CDC events to"
+  default     = null
+}

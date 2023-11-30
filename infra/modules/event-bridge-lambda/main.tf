@@ -5,21 +5,24 @@ module "lambda" {
 }
 
 resource "aws_cloudwatch_event_rule" "rule" {
-    name = var.name
-    event_bus_name = var.event_bus_name
-    event_pattern = var.event_pattern
+    for_each = var.events
+    name = each.key
+    event_bus_name = each.value.event_bus_name
+    event_pattern = each.value.event_pattern
 }
 
 resource "aws_cloudwatch_event_target" "target" {
-    rule = aws_cloudwatch_event_rule.rule.name
+    for_each = var.events
+    rule = aws_cloudwatch_event_rule.rule[each.key].name
     arn = module.lambda.arn
-    event_bus_name = var.event_bus_name
+    event_bus_name = each.value.event_bus_name
 }
 
 resource "aws_lambda_permission" "permission" {
-    statement_id = "AllowExecutionFromCloudWatch"
+    for_each = var.events
+    statement_id = "AllowExecutionFromEventBridge-${each.key}"
     action = "lambda:InvokeFunction"
     function_name = module.lambda.name
     principal = "events.amazonaws.com"
-    source_arn = aws_cloudwatch_event_rule.rule.arn
+    source_arn = aws_cloudwatch_event_rule.rule[each.key].arn
 }

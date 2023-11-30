@@ -49,6 +49,7 @@ module "dynamodb_table" {
   range_key                = var.dynamodb_config.range_key
   global_secondary_indexes = var.dynamodb_config.global_secondary_indexes
   expose_cdc_events        = var.dynamodb_config.expose_cdc_events
+  eventbridge_bus_name     = var.dynamodb_config.eventbridge_bus_name
 }
 
 

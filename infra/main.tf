@@ -68,6 +68,11 @@ resource "aws_iam_role_policy" "api_gateway_cloudwatch_global" {
 
 ####### END #######
 
+# Project event bus
+resource "aws_cloudwatch_event_bus" "blog_butterneck_me" {
+  name = local.name
+}
+
 ################
 # Blog Backend #
 ################
@@ -100,6 +105,7 @@ module "blog_backend" {
       }
     ]
     expose_cdc_events = true
+    eventbridge_bus_name = aws_cloudwatch_event_bus.blog_butterneck_me.name
   }
   openapi_file_path      = local.backend_openapi_file_path
   backend_image_uri      = var.backend_image_uri
@@ -110,8 +116,9 @@ module "blog_backend" {
 # Blog Frontend #
 #################
 module "blog_frontend" {
-  source = "./modules/s3-bucket"
-  name   = "${local.name}-frontend"
+  source                        = "./modules/s3-bucket"
+  name                          = "${local.name}-frontend"
+  publish_events_on_eventbridge = true
 }
 
 #############################################
@@ -124,7 +131,7 @@ module "cdn" {
     aws.use1 = aws.use1
   }
 
-  domain_names      = [local.blog_domain]
+  domain_names           = [local.blog_domain]
   domain_names_zone_name = local.blog_domain
   s3_origins = {
     "default" = {
@@ -134,9 +141,9 @@ module "cdn" {
   }
   apigw_origins = {
     backend = {
-      rest_api_id = module.blog_backend.api_id
-      stage_name  = module.blog_backend.api_stage_name
-      region      = module.blog_backend.api_region
+      rest_api_id  = module.blog_backend.api_id
+      stage_name   = module.blog_backend.api_stage_name
+      region       = module.blog_backend.api_region
       path_pattern = "/api/*"
     }
   }
@@ -154,7 +161,7 @@ module "user_pool" {
     aws.use1 = aws.use1
   }
 
-  name   = local.name
+  name = local.name
   clients = {
     "frontend" = {
       callback_urls = [
@@ -165,10 +172,10 @@ module "user_pool" {
       ]
     }
   }
-  custom_domain = "auth.${local.blog_domain}"
+  custom_domain           = "auth.${local.blog_domain}"
   custom_domain_zone_name = local.blog_domain
 
-  admin_email = "pinton.filippo@protonmail.com"
+  admin_email    = "pinton.filippo@protonmail.com"
   admin_username = "butterneck"
 }
 
@@ -181,13 +188,29 @@ module "cache_invalidator_ecr_repository" {
 }
 
 module "cache_invalidator" {
-  source         = "./modules/event-bridge-lambda"
-  name           = "${local.name}-cache-invalidator"
-  image_uri      = var.cache_invalidator_image_uri
-  event_bus_name = module.blog_backend.ddb_cdc_bus_name
-  event_pattern = jsonencode({
-    source = [
-      "Pipe ${module.blog_backend.ddb_cdc_pipe_name}"
-    ]
-  })
+  source    = "./modules/event-bridge-lambda"
+  name      = "${local.name}-cache-invalidator"
+  image_uri = var.cache_invalidator_image_uri
+  events = {
+    "backend-cdc" = {
+      event_bus_name = module.blog_backend.ddb_cdc_bus_name
+      event_pattern = jsonencode({
+        source = [
+          "Pipe ${module.blog_backend.ddb_cdc_pipe_name}"
+        ]
+      })
+    },
+    # "frontend-deploy" = {
+    #   event_bus_name = "default"
+    #   event_pattern = jsonencode({
+    #     "source" : ["aws.s3"],
+    #     "detail-type" : ["Object Created", "Object Deleted", "Object Restore Completed"],
+    #     "detail" : {
+    #       "bucket" : {
+    #         "name" : [module.blog_frontend.name]
+    #       }
+    #     }
+    #   })
+    # }
+  }
 }

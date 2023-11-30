@@ -55,17 +55,26 @@ resource "aws_dynamodb_table" "this" {
 
 # EventBridge bus where cdc events will be published
 resource "aws_cloudwatch_event_bus" "cdc_bus" {
-  count = var.expose_cdc_events ? 1 : 0
+  count = var.expose_cdc_events && var.eventbridge_bus_name == null ? 1 : 0
   name  = var.name
 }
 
+data "aws_cloudwatch_event_bus" "cdc_bus" {
+  count = var.expose_cdc_events && var.eventbridge_bus_name != null ? 1 : 0
+  name  = var.eventbridge_bus_name
+}
+
+locals {
+  eventbridge_bus_arn = var.expose_cdc_events && var.eventbridge_bus_name != null ? data.aws_cloudwatch_event_bus.cdc_bus[0].arn : aws_cloudwatch_event_bus.cdc_bus[0].arn
+  eventbridge_bus_name = var.expose_cdc_events && var.eventbridge_bus_name != null ? var.eventbridge_bus_name : aws_cloudwatch_event_bus.cdc_bus[0].name
+}
 # EventBridge pipe to forward update events to the event bus
 resource "aws_pipes_pipe" "forward_cdc" {
   count    = var.expose_cdc_events ? 1 : 0
   name     = var.name
   role_arn = aws_iam_role.pipe[0].arn
   source   = aws_dynamodb_table.this.stream_arn
-  target   = aws_cloudwatch_event_bus.cdc_bus[0].arn
+  target   = local.eventbridge_bus_arn
 
   source_parameters {
     dynamodb_stream_parameters {
@@ -134,7 +143,7 @@ resource "aws_iam_role_policy" "pipe_execution_role_eventbridge_write" {
           "events:PutEvents"
         ]
         Effect   = "Allow"
-        Resource = aws_cloudwatch_event_bus.cdc_bus[0].arn
+        Resource = local.eventbridge_bus_arn
       },
     ]
   })
