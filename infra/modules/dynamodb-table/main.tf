@@ -65,7 +65,7 @@ data "aws_cloudwatch_event_bus" "cdc_bus" {
 }
 
 locals {
-  eventbridge_bus_arn = var.expose_cdc_events && var.eventbridge_bus_name != null ? data.aws_cloudwatch_event_bus.cdc_bus[0].arn : aws_cloudwatch_event_bus.cdc_bus[0].arn
+  eventbridge_bus_arn  = var.expose_cdc_events && var.eventbridge_bus_name != null ? data.aws_cloudwatch_event_bus.cdc_bus[0].arn : aws_cloudwatch_event_bus.cdc_bus[0].arn
   eventbridge_bus_name = var.expose_cdc_events && var.eventbridge_bus_name != null ? var.eventbridge_bus_name : aws_cloudwatch_event_bus.cdc_bus[0].name
 }
 # EventBridge pipe to forward update events to the event bus
@@ -98,7 +98,7 @@ resource "aws_iam_role" "pipe" {
         Effect = "Allow"
         Principal = {
           Service = "pipes.amazonaws.com"
-        },
+        }
         Condition = {
           StringEquals = {
             "aws:SourceAccount" : data.aws_caller_identity.current.account_id

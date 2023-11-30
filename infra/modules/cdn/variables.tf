@@ -12,9 +12,9 @@ variable "domain_names_zone_name" {
 
 variable "s3_origins" {
   type = map(object({
-    bucket_name = string
-    domain_name = string
-    origin_path = optional(string)
+    bucket_name  = string
+    domain_name  = string
+    origin_path  = optional(string)
     path_pattern = optional(string)
   }))
   description = "The s3 origins for the CloudFront distribution. Must contain a `default` origin"
@@ -23,10 +23,10 @@ variable "s3_origins" {
 
 variable "apigw_origins" {
   type = map(object({
-    rest_api_id = string
-    stage_name  = string
+    rest_api_id  = string
+    stage_name   = string
     path_pattern = string
-    region      = string
+    region       = string
   }))
   description = "The api gateway origins for the CloudFront distribution"
   default     = {}

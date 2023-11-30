@@ -104,7 +104,7 @@ module "blog_backend" {
         projection_type = "ALL"
       }
     ]
-    expose_cdc_events = true
+    expose_cdc_events    = true
     eventbridge_bus_name = aws_cloudwatch_event_bus.blog_butterneck_me.name
   }
   openapi_file_path      = local.backend_openapi_file_path
@@ -116,9 +116,9 @@ module "blog_backend" {
 # Blog Frontend #
 #################
 module "blog_frontend" {
-  source                        = "./modules/s3-bucket"
-  name                          = "${local.name}-frontend"
-  publish_events_on_eventbridge = true
+  source = "./modules/static-frontend"
+  name   = "${local.name}-frontend"
+  eventbridge_bus_name = aws_cloudwatch_event_bus.blog_butterneck_me.name
 }
 
 #############################################

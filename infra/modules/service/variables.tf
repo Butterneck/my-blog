@@ -25,7 +25,7 @@ variable "dynamodb_config" {
     eventbridge_bus_name     = optional(string)
   })
   description = "Configuration for the DynamoDB table"
-  default = null
+  default     = null
 }
 
 variable "backend_image_uri" {

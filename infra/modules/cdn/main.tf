@@ -165,16 +165,16 @@ data "aws_s3_bucket" "s3_origin" {
 resource "aws_s3_bucket_policy" "allow_cloudfront_read" {
   for_each = var.s3_origins
   bucket   = data.aws_s3_bucket.s3_origin[each.key].id
-  policy   = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Effect    = "Allow"
+        Effect = "Allow"
         Principal = {
           Service = "cloudfront.amazonaws.com"
         }
-        Action    = "s3:GetObject"
-        Resource  = "${data.aws_s3_bucket.s3_origin[each.key].arn}/*"
+        Action   = "s3:GetObject"
+        Resource = "${data.aws_s3_bucket.s3_origin[each.key].arn}/*"
         Condition = {
           StringEquals = {
             "aws:SourceArn" = aws_cloudfront_distribution.this.arn

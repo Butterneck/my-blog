@@ -28,12 +28,12 @@ resource "aws_lambda_permission" "api_gateway" {
 }
 
 module "lambda" {
-  source             = "./../lambda"
-  name               = var.name
-  dynamodb_table_arn = module.dynamodb_table[0].arn
+  source              = "./../lambda"
+  name                = var.name
+  dynamodb_table_arn  = module.dynamodb_table[0].arn
   dynamodb_table_name = module.dynamodb_table[0].name
-  has_dynamodb_table = var.dynamodb_config != null
-  image_uri          = var.backend_image_uri
+  has_dynamodb_table  = var.dynamodb_config != null
+  image_uri           = var.backend_image_uri
 }
 
 

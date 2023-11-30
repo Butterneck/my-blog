@@ -23,11 +23,16 @@ resource "aws_lambda_function" "this" {
   package_type  = "Image"
   architectures = ["arm64"]
   image_uri     = var.image_uri
-  image_config {
-    entry_point       = var.image_config_entry_point
-    command           = var.image_config_command
-    working_directory = var.image_config_working_directory
+
+  dynamic "image_config" {
+    for_each = var.image_config_entry_point != null || var.image_config_command != null || var.image_config_working_directory != null ? [1] : []
+    content {
+      entry_point       = var.image_config_entry_point
+      command           = var.image_config_command
+      working_directory = var.image_config_working_directory
+    }
   }
+
 
   environment {
     variables = {
@@ -40,25 +45,26 @@ resource "aws_lambda_function" "this" {
 # IAM #
 #######
 
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    effect  = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceArn"
-      values   = ["arn:${data.aws_partition.current.id}:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.name}"]
-    }
-  }
-}
-
 resource "aws_iam_role" "lambda" {
-  name               = local.role_name
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  name = local.role_name
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+        Condition = {
+          StringEquals = {
+            "aws:SourceAccount" : data.aws_caller_identity.current.account_id
+            "aws:SourceArn" : "arn:${data.aws_partition.current.id}:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.name}"
+          }
+        }
+      }
+    ]
+  })
 }
 
 ###################
@@ -88,6 +94,10 @@ resource "aws_iam_role_policy" "logs" {
   })
 }
 
+###############
+# Permissions #
+###############
+
 # Grant read write access to DynamoDB table
 resource "aws_iam_role_policy" "dynamodb_read_write" {
   count = var.has_dynamodb_table ? 1 : 0
@@ -112,4 +122,12 @@ resource "aws_iam_role_policy" "dynamodb_read_write" {
       },
     ]
   })
+}
+
+# Add inline policies
+resource "aws_iam_role_policy" "inline_policies" {
+  for_each = var.iam_role_policies
+  name     = each.key
+  role     = aws_iam_role.lambda.id
+  policy   = each.value
 }

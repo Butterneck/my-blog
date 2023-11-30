@@ -4,7 +4,7 @@ variable "name" {
 }
 
 variable "clients" {
-  type        = map(object({
+  type = map(object({
     callback_urls = list(string),
     logout_urls   = list(string),
   }))
@@ -15,23 +15,23 @@ variable "clients" {
 variable "custom_domain" {
   type        = string
   description = "Domain name for the Cognito User Pool"
-  default = null
+  default     = null
 }
 
 variable "custom_domain_zone_name" {
   type        = string
   description = "Name of the r53 zone where custom_domain is hosted"
-  default = null
+  default     = null
 }
 
 variable "admin_email" {
   type        = string
   description = "Email of the admin user"
-  default = null
+  default     = null
 }
 
 variable "admin_username" {
   type        = string
   description = "Username of the admin user"
-  default = null
+  default     = null
 }

@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 5.26.0"
+    }
+  }
+}
+
 data "aws_region" "current" {}
 
 resource "aws_api_gateway_rest_api" "this" {
