@@ -12,7 +12,7 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 locals {
-  role_name = "${var.name}-lambda-execution-role"
+  role_name = "${var.name}-lambda-exec"
 }
 
 resource "aws_lambda_function" "this" {
@@ -20,9 +20,14 @@ resource "aws_lambda_function" "this" {
 
   role = aws_iam_role.lambda.arn
 
-  package_type  = "Image"
+  package_type  = var.image_uri != null ? "Image" : "Zip"
   architectures = ["arm64"]
-  image_uri     = var.image_uri
+
+  filename  = var.image_uri == null && var.filename != null ? var.filename : null
+  source_code_hash = var.image_uri == null && var.filename != null ? filebase64sha256(var.filename) : null
+  handler   = var.image_uri == null && var.handler != null ? var.handler : null
+  runtime   = var.image_uri == null && var.runtime != null? var.runtime : null
+  image_uri = var.image_uri != null ? var.image_uri : null
 
   dynamic "image_config" {
     for_each = var.image_config_entry_point != null || var.image_config_command != null || var.image_config_working_directory != null ? [1] : []
@@ -33,11 +38,10 @@ resource "aws_lambda_function" "this" {
     }
   }
 
-
   environment {
-    variables = {
+    variables = merge(var.environment_variables,{
       DYNAMODB_TABLE_NAME = var.dynamodb_table_name
-    }
+    })
   }
 }
 
@@ -47,7 +51,7 @@ resource "aws_lambda_function" "this" {
 
 resource "aws_iam_role" "lambda" {
   name = local.role_name
-  assume_role_policy = jsonencode({
+  assume_role_policy = var.iam_assume_role_policy != null ? var.iam_assume_role_policy : jsonencode({
     Version = "2012-10-17"
     Statement = [
       {

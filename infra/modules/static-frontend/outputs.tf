@@ -13,7 +13,3 @@ output "regional_domain_name" {
 output "deploy_events_bus_name" {
   value = local.eventbridge_bus_name
 }
-
-output "deploy_events_pipe_name" {
-  value = aws_pipes_pipe.event_batching.name
-}

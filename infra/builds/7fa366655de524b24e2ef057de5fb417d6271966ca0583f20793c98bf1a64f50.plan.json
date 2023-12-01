@@ -1,1 +1,0 @@
-{"filename": "builds/7fa366655de524b24e2ef057de5fb417d6271966ca0583f20793c98bf1a64f50.zip", "runtime": "python3.11", "artifacts_dir": "builds", "build_plan": [["zip", "modules/static-frontend/assets/event-batching-lambda", null]]}

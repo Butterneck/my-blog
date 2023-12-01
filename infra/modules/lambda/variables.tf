@@ -12,6 +12,25 @@ variable "cloudwatch_logs_retention_in_days" {
 variable "image_uri" {
   description = "The ECR image URI containing the function's deployment package."
   type        = string
+  default     = null
+}
+
+variable "filename" {
+  description = "The path to the function's deployment package within the local filesystem. If defined, The s3_bucket and s3_key variables will be ignored."
+  type        = string
+  default     = null
+}
+
+variable "handler" {
+  description = "The function entrypoint in your code."
+  type        = string
+  default     = null
+}
+
+variable "runtime" {
+  description = "The identifier of the function's runtime."
+  type        = string
+  default     = null
 }
 
 variable "image_config_entry_point" {
@@ -51,6 +70,18 @@ variable "has_dynamodb_table" {
 
 variable "iam_role_policies" {
   description = "A list of additional IAM policy ARNs to attach to the Lambda function's IAM role"
+  type        = map(string)
+  default     = {}
+}
+
+variable "iam_assume_role_policy" {
+  description = "The IAM assume role policy document for the Lambda function's IAM role"
+  type        = string
+  default     = null
+}
+
+variable "environment_variables" {
+  description = "A map that defines environment variables for the Lambda function"
   type        = map(string)
   default     = {}
 }
