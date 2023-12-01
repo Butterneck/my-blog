@@ -75,7 +75,7 @@ module "deploy_event_publisher_lambda" {
 
   lambda_environment_variables = {
     EVENTBRIDGE_BUS_NAME = local.eventbridge_bus_name,
-    EVENT_SOURCE_NAME = "var.name",
+    EVENT_SOURCE_NAME = var.name,
   }
 }
 

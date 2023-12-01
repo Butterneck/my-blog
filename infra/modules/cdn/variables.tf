@@ -37,3 +37,13 @@ variable "default_root_object" {
   description = "The default root object for the CloudFront distribution"
   default     = "index.html"
 }
+
+variable "cache_invalidation_events" {
+  type = map(object({
+    event_bus_name = string,
+    event_pattern  = string,
+    invalidate_paths = optional(list(string))
+  }))
+  description = "The events that will trigger a cache invalidation"
+  default     = {}
+}

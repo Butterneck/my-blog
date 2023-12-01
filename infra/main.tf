@@ -88,7 +88,7 @@ module "blog_backend" {
       },
       {
         name = "createdAt"
-        type = "S"
+        type = "N"
       },
       {
         name = "slug"
@@ -148,7 +148,26 @@ module "cdn" {
     }
   }
 
-  # depends_on = [module.dns_zone, module.blog_frontend, module.blog_backend]
+  cache_invalidation_events = {
+    "backend-cdc" = {
+      event_bus_name = module.blog_backend.ddb_cdc_bus_name
+      event_pattern = jsonencode({
+        source = [
+          "Pipe ${module.blog_backend.ddb_cdc_pipe_name}"
+        ]
+      }),
+      invalidate_paths = [
+        "/api/*"
+      ]
+    },
+    "frontend-deploy" = {
+      event_bus_name = module.blog_frontend.deploy_events_bus_name
+      event_pattern = jsonencode({
+        "source" : [module.blog_frontend.name],
+        "detail-type" : [ "Frontend Deployed" ],
+      })
+    }
+  }
 }
 
 #####################################################
@@ -177,40 +196,4 @@ module "user_pool" {
 
   admin_email    = "pinton.filippo@protonmail.com"
   admin_username = "butterneck"
-}
-
-#####################
-# Cache invalidator #
-#####################
-module "cache_invalidator_ecr_repository" {
-  source = "./modules/ecr-private-repository"
-  name   = "${local.name}-cache-invalidator"
-}
-
-module "cache_invalidator" {
-  source    = "./modules/event-bridge-lambda"
-  name      = "${local.name}-cache-invalidator"
-  image_uri = var.cache_invalidator_image_uri
-  events = {
-    "backend-cdc" = {
-      event_bus_name = module.blog_backend.ddb_cdc_bus_name
-      event_pattern = jsonencode({
-        source = [
-          "Pipe ${module.blog_backend.ddb_cdc_pipe_name}"
-        ]
-      })
-    },
-    # "frontend-deploy" = {
-    #   event_bus_name = "default"
-    #   event_pattern = jsonencode({
-    #     "source" : ["aws.s3"],
-    #     "detail-type" : ["Object Created", "Object Deleted", "Object Restore Completed"],
-    #     "detail" : {
-    #       "bucket" : {
-    #         "name" : [module.blog_frontend.name]
-    #       }
-    #     }
-    #   })
-    # }
-  }
 }

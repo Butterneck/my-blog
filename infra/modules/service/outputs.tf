@@ -11,11 +11,11 @@ output "api_region" {
 }
 
 output "ddb_cdc_bus_name" {
-  value = module.dynamodb_table[0].cdc_bus_name
+  value = length(module.dynamodb_table) > 0 ? module.dynamodb_table[0].cdc_bus_name : null
 }
 
 output "ddb_cdc_pipe_name" {
-  value = module.dynamodb_table[0].cdc_pipe_name
+  value = length(module.dynamodb_table) > 0 ? module.dynamodb_table[0].cdc_pipe_name : null
 }
 
 output "ecr_repository_url" {

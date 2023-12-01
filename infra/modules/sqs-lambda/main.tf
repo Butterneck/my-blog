@@ -46,6 +46,8 @@ module "lambda" {
   handler  = var.lambda_handler
   runtime  = var.lambda_runtime
 
+  image_uri = var.lambda_image_uri
+
   iam_role_policies = merge(var.lambda_iam_role_policies, {
     "sqs" = jsonencode({
       Version = "2012-10-17"

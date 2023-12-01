@@ -11,6 +11,13 @@ module "lambda" {
   source    = "./../lambda"
   name      = var.name
   image_uri = var.image_uri
+  filename = var.lambda_filename
+  handler  = var.lambda_handler
+  runtime  = var.lambda_runtime
+
+  iam_assume_role_policy = var.lambda_iam_assume_role_policy
+  iam_role_policies = var.lambda_iam_role_policies
+  environment_variables = var.lambda_environment_variables
 }
 
 resource "aws_cloudwatch_event_rule" "rule" {
@@ -25,6 +32,8 @@ resource "aws_cloudwatch_event_target" "target" {
   rule           = aws_cloudwatch_event_rule.rule[each.key].name
   arn            = module.lambda.arn
   event_bus_name = each.value.event_bus_name
+
+  input = each.value.input
 }
 
 resource "aws_lambda_permission" "permission" {

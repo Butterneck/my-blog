@@ -184,3 +184,48 @@ resource "aws_s3_bucket_policy" "allow_cloudfront_read" {
     ]
   })
 }
+
+locals {
+  _cache_invalidation_events = { for event_name, event in var.cache_invalidation_events : event_name => {
+    event_bus_name = event.event_bus_name
+    event_pattern  = event.event_pattern
+    input = jsonencode({
+      invalidate_paths = event.invalidate_paths != null ? event.invalidate_paths : ["/*"]
+    })
+  } }
+}
+
+module "cache_invalidator" {
+  source          = "./../event-bridge-lambda"
+  name            = "cloudfront-${aws_cloudfront_distribution.this.id}-cache-invalidator"
+  lambda_filename = data.archive_file.cache_invalidator_zip.output_path
+  lambda_handler  = "index.handler"
+  lambda_runtime  = "python3.11"
+
+  events = local._cache_invalidation_events
+
+  lambda_environment_variables = {
+    CLOUDFRONT_DISTRIBUTION_ID = aws_cloudfront_distribution.this.id
+  }
+
+  lambda_iam_role_policies = {
+    "cloudfront_invalidate_cache" = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "cloudfront:CreateInvalidation",
+          ]
+          Effect   = "Allow"
+          Resource = aws_cloudfront_distribution.this.arn
+        },
+      ]
+    })
+  }
+}
+
+data "archive_file" "cache_invalidator_zip" {
+  type        = "zip"
+  source_file = "${path.module}/assets/invalidate-cloudfront-cache/index.py"
+  output_path = "${path.module}/assets/invalidate-cloudfront-cache.zip"
+}

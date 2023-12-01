@@ -105,7 +105,6 @@ resource "aws_iam_role_policy" "logs" {
 # Grant read write access to DynamoDB table
 resource "aws_iam_role_policy" "dynamodb_read_write" {
   count = var.has_dynamodb_table ? 1 : 0
-  name  = "dynamodb_read"
   role  = aws_iam_role.lambda.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -122,7 +121,10 @@ resource "aws_iam_role_policy" "dynamodb_read_write" {
           "dynamodb:DeleteItem"
         ]
         Effect   = "Allow"
-        Resource = var.dynamodb_table_arn
+        Resource = [
+          var.dynamodb_table_arn,
+          "${var.dynamodb_table_arn}/*"
+        ]
       },
     ]
   })
