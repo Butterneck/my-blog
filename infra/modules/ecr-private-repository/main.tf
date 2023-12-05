@@ -1,4 +1,6 @@
 terraform {
+  required_version = "1.5.4"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -7,8 +9,6 @@ terraform {
   }
 }
 
-data "aws_caller_identity" "current" {}
-data "aws_partition" "current" {}
 
 
 resource "aws_ecr_repository" "this" {

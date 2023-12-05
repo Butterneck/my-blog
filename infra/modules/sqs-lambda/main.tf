@@ -1,4 +1,6 @@
 terraform {
+  required_version = "1.5.4"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -9,19 +11,19 @@ terraform {
 
 
 resource "aws_sqs_queue" "this" {
-  name = var.name
+  name                       = var.name
   visibility_timeout_seconds = 90
 }
 
 resource "aws_sqs_queue_policy" "policy" {
   for_each  = var.sqs_queue_policies
   queue_url = aws_sqs_queue.this.id
-  policy    = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid       = each.key
-        Effect    = "Allow"
+        Sid    = each.key
+        Effect = "Allow"
         Principal = {
           Service = each.value.servicePrincipal
         }

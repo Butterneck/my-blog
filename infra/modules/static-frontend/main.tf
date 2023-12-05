@@ -1,18 +1,23 @@
 terraform {
+  required_version = "1.5.4"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = ">= 5.26.0"
     }
+
+    archive = {
+      source  = "hashicorp/archive"
+      version = "2.4.0"
+    }
   }
 }
 
-data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
 
 locals {
-  eventbridge_bus_arn       = var.eventbridge_bus_name != null ? data.aws_cloudwatch_event_bus.event_bus[0].arn : aws_cloudwatch_event_bus.event_bus[0].arn
-  eventbridge_bus_name      = var.eventbridge_bus_name != null ? var.eventbridge_bus_name : aws_cloudwatch_event_bus.event_bus[0].name
+  eventbridge_bus_arn  = var.eventbridge_bus_name != null ? data.aws_cloudwatch_event_bus.event_bus[0].arn : aws_cloudwatch_event_bus.event_bus[0].arn
+  eventbridge_bus_name = var.eventbridge_bus_name != null ? var.eventbridge_bus_name : aws_cloudwatch_event_bus.event_bus[0].name
 }
 
 module "s3_bucket" {
@@ -67,15 +72,15 @@ module "deploy_event_publisher_lambda" {
 
   sqs_queue_policies = {
     "allowEventbridge" = {
-        servicePrincipal = "events.amazonaws.com"
-        actions          = ["sqs:SendMessage"]
-        sourceArn        = aws_cloudwatch_event_rule.object_updated.arn
+      servicePrincipal = "events.amazonaws.com"
+      actions          = ["sqs:SendMessage"]
+      sourceArn        = aws_cloudwatch_event_rule.object_updated.arn
     }
   }
 
   lambda_environment_variables = {
     EVENTBRIDGE_BUS_NAME = local.eventbridge_bus_name,
-    EVENT_SOURCE_NAME = var.name,
+    EVENT_SOURCE_NAME    = var.name,
   }
 }
 

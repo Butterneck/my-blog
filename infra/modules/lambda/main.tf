@@ -1,4 +1,6 @@
 terraform {
+  required_version = "1.5.4"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -23,11 +25,11 @@ resource "aws_lambda_function" "this" {
   package_type  = var.image_uri != null ? "Image" : "Zip"
   architectures = ["arm64"]
 
-  filename  = var.image_uri == null && var.filename != null ? var.filename : null
+  filename         = var.image_uri == null && var.filename != null ? var.filename : null
   source_code_hash = var.image_uri == null && var.filename != null ? filebase64sha256(var.filename) : null
-  handler   = var.image_uri == null && var.handler != null ? var.handler : null
-  runtime   = var.image_uri == null && var.runtime != null? var.runtime : null
-  image_uri = var.image_uri != null ? var.image_uri : null
+  handler          = var.image_uri == null && var.handler != null ? var.handler : null
+  runtime          = var.image_uri == null && var.runtime != null ? var.runtime : null
+  image_uri        = var.image_uri != null ? var.image_uri : null
 
   dynamic "image_config" {
     for_each = var.image_config_entry_point != null || var.image_config_command != null || var.image_config_working_directory != null ? [1] : []
@@ -39,7 +41,7 @@ resource "aws_lambda_function" "this" {
   }
 
   environment {
-    variables = merge(var.environment_variables,{
+    variables = merge(var.environment_variables, {
       DYNAMODB_TABLE_NAME = var.dynamodb_table_name
     })
   }
@@ -120,7 +122,7 @@ resource "aws_iam_role_policy" "dynamodb_read_write" {
           "dynamodb:UpdateItem",
           "dynamodb:DeleteItem"
         ]
-        Effect   = "Allow"
+        Effect = "Allow"
         Resource = [
           var.dynamodb_table_arn,
           "${var.dynamodb_table_arn}/*"

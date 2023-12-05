@@ -1,4 +1,6 @@
 terraform {
+  required_version = "1.5.4"
+
   required_providers {
     aws = {
       source                = "hashicorp/aws"
@@ -74,21 +76,9 @@ resource "aws_cognito_user_pool_domain" "custom_domain" {
   certificate_arn = module.custom_domain_certificate[0].arn
 }
 
-locals {
-  _cfn_distribution_arn            = split("/", aws_cognito_user_pool_domain.custom_domain[0].cloudfront_distribution_arn)
-  custom_domain_cloudfront_zone_id = element(local._cfn_distribution_arn, length(local._cfn_distribution_arn) - 1)
-}
-# module "custom_domain_dns_record" {
-#   count = var.custom_domain != null ? 1 : 0
-#   source = "./../cname-record"
-#   name = var.custom_domain
-#   hosted_zone_name = var.custom_domain_zone_name
-#   value = aws_cognito_user_pool_domain.custom_domain[0].cloudfront_distribution
-# }
-
 
 # Admin user
-resource "aws_cognito_user" "example" {
+resource "aws_cognito_user" "admin" {
   count        = var.admin_email != null || var.admin_username != null ? 1 : 0
   user_pool_id = aws_cognito_user_pool.this.id
   username     = coalesce(var.admin_username, var.admin_email)
@@ -98,16 +88,16 @@ resource "aws_cognito_user" "example" {
   }
 }
 
-data "aws_route53_zone" "example" {
+data "aws_route53_zone" "custom_domain" {
   count = var.custom_domain != null ? 1 : 0
   name  = var.custom_domain_zone_name
 }
 
-resource "aws_route53_record" "auth-cognito-A" {
+resource "aws_route53_record" "auth_cognito_A" {
   count   = var.custom_domain != null ? 1 : 0
   name    = aws_cognito_user_pool_domain.custom_domain[0].domain
   type    = "A"
-  zone_id = data.aws_route53_zone.example[0].zone_id
+  zone_id = data.aws_route53_zone.custom_domain[0].zone_id
   alias {
     evaluate_target_health = false
     name                   = aws_cognito_user_pool_domain.custom_domain[0].cloudfront_distribution_arn

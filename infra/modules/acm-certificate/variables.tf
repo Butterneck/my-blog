@@ -20,8 +20,3 @@ variable "is_hosted_zone_private" {
   default     = false
 }
 
-variable "region" {
-  type        = string
-  description = "Region where the certificate will be created"
-  default     = "us-east-1"
-}

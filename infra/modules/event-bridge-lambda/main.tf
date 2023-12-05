@@ -1,4 +1,6 @@
 terraform {
+  required_version = "1.5.4"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -11,13 +13,13 @@ module "lambda" {
   source    = "./../lambda"
   name      = var.name
   image_uri = var.image_uri
-  filename = var.lambda_filename
-  handler  = var.lambda_handler
-  runtime  = var.lambda_runtime
+  filename  = var.lambda_filename
+  handler   = var.lambda_handler
+  runtime   = var.lambda_runtime
 
   iam_assume_role_policy = var.lambda_iam_assume_role_policy
-  iam_role_policies = var.lambda_iam_role_policies
-  environment_variables = var.lambda_environment_variables
+  iam_role_policies      = var.lambda_iam_role_policies
+  environment_variables  = var.lambda_environment_variables
 }
 
 resource "aws_cloudwatch_event_rule" "rule" {

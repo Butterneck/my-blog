@@ -18,7 +18,6 @@ variable "s3_origins" {
     path_pattern = optional(string)
   }))
   description = "The s3 origins for the CloudFront distribution. Must contain a `default` origin"
-  default     = {}
 }
 
 variable "apigw_origins" {
@@ -40,8 +39,8 @@ variable "default_root_object" {
 
 variable "cache_invalidation_events" {
   type = map(object({
-    event_bus_name = string,
-    event_pattern  = string,
+    event_bus_name   = string,
+    event_pattern    = string,
     invalidate_paths = optional(list(string))
   }))
   description = "The events that will trigger a cache invalidation"

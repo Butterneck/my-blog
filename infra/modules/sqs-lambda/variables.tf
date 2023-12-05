@@ -3,12 +3,6 @@ variable "name" {
   description = "Name of the Lambda function"
 }
 
-variable "sqs_queue_name" {
-  type        = string
-  description = "Name of the SQS queue to which the Lambda function needs access"
-  default     = null
-}
-
 variable "sqs_queue_policies" {
   type = map(object({
     actions          = list(string),

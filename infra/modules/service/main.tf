@@ -1,4 +1,6 @@
 terraform {
+  required_version = "1.5.4"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -6,8 +8,6 @@ terraform {
     }
   }
 }
-
-data "aws_region" "current" {}
 
 ###################
 # Lambda function #
@@ -30,7 +30,7 @@ resource "aws_lambda_permission" "api_gateway" {
 module "lambda" {
   source              = "./../lambda"
   name                = var.name
-  dynamodb_table_arn  =  length(module.dynamodb_table) > 0 ? module.dynamodb_table[0].arn : null
+  dynamodb_table_arn  = length(module.dynamodb_table) > 0 ? module.dynamodb_table[0].arn : null
   dynamodb_table_name = length(module.dynamodb_table) > 0 ? module.dynamodb_table[0].name : null
   has_dynamodb_table  = var.dynamodb_config != null
   image_uri           = var.backend_image_uri
