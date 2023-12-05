@@ -1,6 +1,6 @@
 interface Post {
   body: string,
-  createdAt: Date
+  createdAt: int
   description: string
   isCompleted: boolean
   title: string; 

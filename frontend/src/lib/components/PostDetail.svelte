@@ -4,8 +4,13 @@
 </script>
 
 <div class="post-detail">
+  <!-- <div class="post-detail__cover">
+    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmir-s3-cdn-cf.behance.net%2Fproject_modules%2Fmax_1200%2F0934be75683871.5c53311dabafc.png&f=1&nofb=1&ipt=8d274fb911151dead3fa383674b250eeb6084d9493869d6a6c8ce66f9777ef8a&ipo=images" alt="">
+  </div> -->
   <div class="post-detail__top">
     <h1 class="post-detail__top__title">{post.title}</h1>
+
+    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmir-s3-cdn-cf.behance.net%2Fproject_modules%2Fmax_1200%2F0934be75683871.5c53311dabafc.png&f=1&nofb=1&ipt=8d274fb911151dead3fa383674b250eeb6084d9493869d6a6c8ce66f9777ef8a&ipo=images" alt="">
 
     <div class="post-detail__top__info">
       <span class="post-detail__top__info__date">
