@@ -12,5 +12,6 @@
   <Content>
     <slot />
   </Content>
-  <Footer />
+  <!-- <Footer /> -->
+  
 </Container>

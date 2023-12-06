@@ -4,7 +4,6 @@
 	import { blogMetaData } from '$lib/blogMetaData';
 	import { MetaTags } from 'svelte-meta-tags';
 	import PostList from '$lib/components/PostList.svelte';
-	import PostItem from '$lib/components/Post.svelte';
 
 	const meta = {
 		title: `Home | ${blogMetaData.blogTitle}`,
@@ -45,8 +44,5 @@
 	}}
 />
 
-<PostList>
-  {#each data.posts as post}
-    <PostItem {post} />
-  {/each}
-</PostList>
+
+<PostList posts={data.posts} />

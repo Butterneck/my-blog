@@ -1,7 +1,1 @@
-<div class="content"><slot /></div>
-
-<style>
-  .content {
-    padding: 1rem;
-  }
-</style>
+<div class="flex max-width-main mx-6 lg:mx-12 lg:w-auto pb-10"><slot /></div>
