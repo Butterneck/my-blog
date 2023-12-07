@@ -1,5 +1,8 @@
 <script lang="ts">
-	export let data;
+	export let data: {
+		posts: Post[];
+		trendingPosts: Post[];
+	};
 	import { envVariables } from '$lib/envVariables';
 	import { blogMetaData } from '$lib/blogMetaData';
 	import { MetaTags } from 'svelte-meta-tags';
