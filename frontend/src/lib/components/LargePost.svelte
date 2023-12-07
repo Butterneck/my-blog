@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { format } from 'fecha';
+	import PostAuthor from './PostAuthor.svelte';
+	import PostMetadata from './PostMetadata.svelte';
 
 	export let post: Post;
 </script>
@@ -18,36 +19,13 @@
 		</a>
 
 		<!-- POST AUTHOR -->
-		<div class="sub-text font-medium main-black mt-3 flex flex-row items-center">
-			<div>
-				<img
-					class="rounded-full w-5 h-5"
-					src="https://reddium.vercel.app/avatars/avatar_15.jpg"
-					alt=""
-				/>
-			</div>
-			<a href={`/user/foo`}>
-				<span class="ml-2 font-semibold">Butterneck</span>
-			</a>
-		</div>
+		<PostAuthor />
 
 		<!-- POST TITLE -->
 		<a href={`/blog/${post.slug}`}>
 			<h2 class="text-2xl mt-2 leading-6 line-clamp-2">{post.title}</h2>
 		</a>
 
-		<!-- POST METADATA -->
-		<div class="sub-text mt-2">
-			<span>{format(new Date(post.createdAt * 1000), 'MMM D')}</span>
-			<span class="px-2">·</span>
-			<a class="link-black-hover" href="TODO"> 9 min read </a>
-		</div>
+		<PostMetadata post={post} />
 	</div>
 </div>
-
-<style lang="postcss">
-	.big-post-img {
-		min-height: 240px;
-		background-size: cover;
-	}
-</style>

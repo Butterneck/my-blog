@@ -1,12 +1,10 @@
 <script lang="ts">
-    import RankedPost from './RankedPost.svelte';
-    export let posts: Post[];
+	import RankedPost from './RankedPost.svelte';
+	export let posts: Post[];
 </script>
 
-<div
-	class="flex md:w-auto main-container max-width-main pb-10 pt-10 sub-top-border sm:mx-12 mx-6 xl:mx-auto"
->
-	<div class="w-full flex mb-4 flex-row items-center lg:px-8">
+<div class="flex home-container">
+	<div class="w-full flex mb-8 flex-row items-center lg:px-8">
 		<span class="mr-2">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
