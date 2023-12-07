@@ -92,11 +92,11 @@
 <!-- ALL POSTS -->
 <!-- <div class="w-full flex main-container max-width-main pb-4 pt-10 sub-top-border posts-grid lg:w-auto lg:mx-12 md:block sm:mx-6"> -->
 
-<div class="flex md:w-auto main-container max-width-main pb-10 pt-10 sub-top-border sm:mx-12 mx-6 xl:mx-auto posts-grid">	
+<div class="md:w-auto main-container max-width-main pb-10 pt-10 sub-top-border sm:mx-12 mx-6 xl:mx-auto posts-grid">	
 	<div class="w-full mb-4 grid-left">
 		{#each data.posts.slice(1, 10) as post}
 
-			<SmallPost {post} />
+			<WidePost {post} />
 		{/each}
 	  <div class="w-full text-center">
 		<!-- {/* <WideCard {...({} as Post)} /> */} -->
