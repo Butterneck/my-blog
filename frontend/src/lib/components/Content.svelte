@@ -1,1 +1,1 @@
-<div class="flex max-width-main mx-6 lg:mx-12 lg:w-auto pb-10"><slot /></div>
+<div class="flex md:w-auto main-container max-width-main mx-6 sm:mx-12 pb-10 xl:mx-auto"><slot /></div>

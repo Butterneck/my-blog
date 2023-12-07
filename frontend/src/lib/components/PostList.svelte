@@ -2,15 +2,14 @@
 	export let posts: Post[];
 	import LargePost from './LargePost.svelte';
 	import SmallPost from './SmallPost.svelte';
-
 </script>
 
-<div class="post-list">
-	{#if posts.length > 0}
-		<LargePost post={posts[0]} />
+<div class="mid-container lg:px-8 md:pr-4 px-0">
+	<LargePost post={posts[0]} />
+</div>
 
-		{#each posts.slice(1) as post}
-			<SmallPost {post} />
-		{/each}
-	{/if}
+<div class="mid-container lg:px-8 md:pl-4 px-0">
+	{#each posts.slice(1, 5) as post}
+		<SmallPost {post} />
+	{/each}
 </div>

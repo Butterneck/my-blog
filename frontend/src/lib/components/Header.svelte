@@ -3,7 +3,8 @@
 </script>
 
 <header>
-	<nav class="flex items-center justify-center max-width-main z-50 h-16 my-6 lg:mx-12 mx-6">
+	<!-- class="flex items-center justify-center max-width-main mx-auto z-50 h-16 my-6 lg:mx-12 sm:mx-6" -->
+	<nav class="flex items-center justify-center max-width-main z-50 h-16 my-6 sm:mx-12 mx-6 xl:mx-auto">
 		<div class="flex-grow flex items-center">
 			<a href="/">
 				<div class="pr-4 nav-img h-8 flex flex-row items-center cursor-pointer border-0">

@@ -41,7 +41,7 @@
 		<!-- POST IMAGE -->
 		<a class="cursor-pointer m-0 p-0" href={`/blog/${post.slug}`}>
 			<img
-				class="align-middle w-24 h-24 overflow-clip aspect-square max-w-none"
+				class="align-middle w-28 h-28 overflow-clip aspect-square max-w-none"
 				src="https://media.istockphoto.com/id/583809524/it/foto/alberta-selvaggia-vicino-a-banff.jpg?s=612x612&w=0&k=20&c=wNnbWawMkk9idvuKsw4gxdJ8OQX0PCxgGDcsTdrwM4E="
 				alt=""
 			/>
