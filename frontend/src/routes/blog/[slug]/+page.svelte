@@ -71,16 +71,15 @@
 		<figcaption class="mt-2 mx-auto sub-opacity-54 text-center text-sm">Caption</figcaption>
 	</figure>
 
-  <!-- POST CONTENT -->
+	<!-- POST CONTENT -->
 	<div class="mt-6 heading-font text-xl whitespace-pre-line main-black post-content sm:text-lg">
 		{post.body}
 	</div>
 
 	<!-- POST FOOTER -->
-	<div class="w-full mt-4 pt-4 flex flex-row justify-between items-center">
-
-    <!-- CLAP BUTTON -->
-		<div class="flex flex-row items-center">
+	<!-- <div class="w-full mt-4 pt-4 flex flex-row justify-between items-center"> -->
+		<!-- CLAP BUTTON -->
+		<!-- <div class="flex flex-row items-center">
 			<div class="flex flex-row items-center sub-opacity-54 tracking-tight">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -100,10 +99,10 @@
 				<div>
 					<p class="ml-2">{`1000 claps`}</p>
 				</div>
-			</div>
+			</div> -->
 
-      <!-- COMMENTS -->
-			<div class="ml-4 flex flex-row items-center sub-opacity-54 tracking-tight">
+			<!-- COMMENTS -->
+			<!-- <div class="ml-4 flex flex-row items-center sub-opacity-54 tracking-tight">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					fill="none"
@@ -122,11 +121,11 @@
 				<div>
 					<p class="ml-1">23 comments</p>
 				</div>
-			</div>
-		</div>
+			</div> -->
+		<!-- </div> -->
 
-    <!-- SHARE BUTTON -->
-		<div class="flex flex-row items-center sub-opacity-54 tracking-tight">
+		<!-- SHARE BUTTON -->
+		<!-- <div class="flex flex-row items-center sub-opacity-54 tracking-tight">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
@@ -141,6 +140,6 @@
 					d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m0-3l-3-3m0 0l-3 3m3-3V15"
 				/>
 			</svg>
-		</div>
-	</div>
+		</div> -->
+	<!-- </div> -->
 </div>
