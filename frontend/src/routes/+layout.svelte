@@ -1,17 +1,13 @@
 <script>
   import "../app.pcss";
-  // import "../assets/styles/global.css";
   import Header from "$lib/components/Header.svelte";
-  import Container from "$lib/components/Container.svelte";
-  import Content from "$lib/components/Content.svelte";
-  import Footer from "$lib/components/Footer.svelte";
 </script>
 
-<Container>
+<div>
   <Header />
-  <Content>
+  <div>
     <slot />
-  </Content>
+  </div>
   <!-- <Footer /> -->
   
-</Container>
+</div>
