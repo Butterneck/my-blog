@@ -1,82 +1,44 @@
-<script>
-	import { createPost } from '$lib/postsApi';
+<script lang="ts">
+	import { Editor } from 'bytemd';
+	import highlight from '@bytemd/plugin-highlight';
+	import gfm from '@bytemd/plugin-gfm';
+	import 'highlight.js/styles/default.css';
 
-	let title = '';
-	let body = '';
+	/**
+	 * @type {any}
+	 */
+	let value = 'Ciao';
+	const plugins = [
+		gfm(),
+		highlight()
+		// Add more plugins here
+	];
 
-	async function createNewPost() {
-		const newPost = await createPost({
-			title,
-			body
-		});
+	/**
+	 * @param {{ detail: { value: any; }; }} e
+	 */
+	function handleChange(e) {
+		value = e.detail.value;
+	}
+
+	function uploadImages(e: File) {
+		// TODO: Implement logic to upload images to S3
+		console.log(e);
+		console.log('upload images');
+	}
+
+	function publishPost() {
+		console.log('publish post');
 	}
 </script>
 
-<h1>New Post</h1>
-<input bind:value={title} placeholder="Post title" />
-<textarea bind:value={body} placeholder="Post body" />
-<button on:click={createNewPost}>Create New Post</button>
+<Editor {value} {plugins} {uploadImages} on:change={handleChange} />
 
-<style>
-	button {
-		display: inline-block;
-		padding: 10px 20px;
-		font-size: 16px;
-		font-weight: bold;
-		text-align: center;
-		text-decoration: none;
-		cursor: pointer;
-		border: 2px solid #333;
-		border-radius: 4px;
-		background-color: #f0f0f0;
-		color: #333;
-		transition:
-			background-color 0.3s ease,
-			color 0.3s ease,
-			border-color 0.3s ease;
-	}
-
-	button:hover {
-		background-color: #333;
-		color: #fff;
-		border-color: #fff;
-	}
-
-	/* Input Style */
-	input {
-		display: block;
-		width: 100%;
-		padding: 10px;
-		margin-bottom: 15px;
-		font-size: 16px;
-		border: 1px solid #ccc;
-		border-radius: 4px;
-		box-sizing: border-box;
-	}
-
-	/* Optional: Add styles for focus state */
-	input:focus {
-		border-color: #007bff;
-		outline: none;
-		/* Add any additional styles for the focus state */
-	}
-
-	/* Textarea Style */
-	textarea {
-		display: block;
-		width: 100%;
-		padding: 10px;
-		margin-bottom: 15px;
-		font-size: 16px;
-		border: 1px solid #ccc;
-		border-radius: 4px;
-		box-sizing: border-box;
-	}
-
-	/* Optional: Add styles for focus state */
-	textarea:focus {
-		border-color: #007bff;
-		outline: none;
-		/* Add any additional styles for the focus state */
-	}
-</style>
+<div class="flex justify-center">
+	<button
+		class="my-4 py-1 px-28 text-sm cursor-pointer max-w-full btn-black text-white outline-1px rounded"
+		on:click={publishPost}
+	>
+		Publish
+	</button>
+</div>
