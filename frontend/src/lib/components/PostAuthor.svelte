@@ -6,7 +6,7 @@
 			alt=""
 		/>
 	</div>
-	<a href={`/user/foo`}>
+	<a href="/about">
 		<span class="ml-2 font-semibold">Butterneck</span>
 	</a>
 </div>

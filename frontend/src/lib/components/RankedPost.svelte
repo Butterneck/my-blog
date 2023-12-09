@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { format } from 'fecha';
+	import PostMetadata from './PostMetadata.svelte';
 	export let post: Post;
 </script>
 
@@ -33,11 +33,7 @@
 			</div>
 
 			<!-- POST METADATA -->
-			<div class="sub-text mt-2">
-				<span>{format(new Date(post.createdAt * 1000), 'MMM D')}</span>
-				<span class="px-0.5">·</span>
-				<span>9 min read</span>
-			</div>
+			<PostMetadata post={post} />
 		</div>
 	</div>
 </div>

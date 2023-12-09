@@ -56,28 +56,42 @@
 
 <div class="sm:w-full sm:mx-auto max-w-680 pb-2 mt-6 mx-6 w-auto">
 	<!-- POST TITLE -->
-	<h1 class="heading-font sm:text-5xl font-bold sm:leading-tight text-3xl leading-9 pt-8">
-		{post.title}
-	</h1>
+	<span>
+		<div>
+			<span
+				class="align-middle heading-font sm:text-5xl font-bold sm:leading-tight text-3xl leading-9 pt-8"
+				>{post.title}</span
+			>
 
-	<!-- POST IMAGE -->
-	<figure class="mt-12">
-		<img
-			class="w-full shimmer-bg"
-			src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F48%2Fa5%2Fc0%2F48a5c07d54cd6e36a4bc87f4376fb696.jpg&f=1&nofb=1&ipt=31d64d5ce92427ad837b375e5ae6aa4e2001b1204ebfa456285bb4d44e771326&ipo=images"
-			width="100%"
-			alt=""
-		/>
-		<figcaption class="mt-2 mx-auto sub-opacity-54 text-center text-sm">Caption</figcaption>
-	</figure>
+			<!-- TODO: Show only to authenticated users -->
+			<!-- TODO: Redirect to edit page -->
+			<span class="align-middle">
+				<button
+					class="ml-10 mt-2 p-1 px-3 text-sm cursor-pointer max-w-full btn-black text-white outline-1px rounded"
+				>
+					Edit
+				</button>
+			</span>
+		</div>
 
-	<!-- POST CONTENT -->
-	<div class="mt-6 heading-font text-xl whitespace-pre-line main-black post-content sm:text-lg">
-		{post.body}
-	</div>
+		<!-- POST IMAGE -->
+		<figure class="mt-12">
+			<img
+				class="w-full shimmer-bg"
+				src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F48%2Fa5%2Fc0%2F48a5c07d54cd6e36a4bc87f4376fb696.jpg&f=1&nofb=1&ipt=31d64d5ce92427ad837b375e5ae6aa4e2001b1204ebfa456285bb4d44e771326&ipo=images"
+				width="100%"
+				alt=""
+			/>
+			<figcaption class="mt-2 mx-auto sub-opacity-54 text-center text-sm">Caption</figcaption>
+		</figure>
 
-	<!-- POST FOOTER -->
-	<!-- <div class="w-full mt-4 pt-4 flex flex-row justify-between items-center"> -->
+		<!-- POST CONTENT -->
+		<div class="mt-6 heading-font text-xl whitespace-pre-line main-black post-content sm:text-lg">
+			{post.body}
+		</div>
+
+		<!-- POST FOOTER -->
+		<!-- <div class="w-full mt-4 pt-4 flex flex-row justify-between items-center"> -->
 		<!-- CLAP BUTTON -->
 		<!-- <div class="flex flex-row items-center">
 			<div class="flex flex-row items-center sub-opacity-54 tracking-tight">
@@ -101,8 +115,8 @@
 				</div>
 			</div> -->
 
-			<!-- COMMENTS -->
-			<!-- <div class="ml-4 flex flex-row items-center sub-opacity-54 tracking-tight">
+		<!-- COMMENTS -->
+		<!-- <div class="ml-4 flex flex-row items-center sub-opacity-54 tracking-tight">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					fill="none"
@@ -141,5 +155,6 @@
 				/>
 			</svg>
 		</div> -->
-	<!-- </div> -->
+		<!-- </div> -->
+	</span>
 </div>

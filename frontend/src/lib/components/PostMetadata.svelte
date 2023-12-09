@@ -1,6 +1,5 @@
 <script lang="ts">
     import { format } from 'fecha';
-    import PostAuthor from './PostAuthor.svelte';
 
     export let post: Post;
 </script>
@@ -8,5 +7,15 @@
 <div class="sub-text mt-2">
     <span>{format(new Date(post.createdAt * 1000), 'MMM D')}</span>
     <span class="px-2">·</span>
-    <a class="link-black-hover" href="TODO"> 9 min read </a>
+    <span> 9 min read </span>
+
+    <!-- TODO: show drafts only to authenticated users -->
+    <!-- TODO: show only for drafts -->
+    <!-- TODO: on click go to edit page -->
+    <button
+		class=" ml-4 p-1 px-3 text-sm cursor-pointer max-w-full btn-black text-white outline-1px rounded"
+	>
+		Draft
+	</button>
+
 </div>

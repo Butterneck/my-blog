@@ -122,7 +122,7 @@ module "blog_frontend" {
 }
 
 #############################################
-# CDN for both the frontend and the backend #
+# CDN for both frontend and backend #
 #############################################
 module "cdn" {
   source = "./modules/cdn"
