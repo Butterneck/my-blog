@@ -1,9 +1,9 @@
+import { getPost } from "$lib/api";
+
 export async function load({ params }) {
   const slug = params.slug.toLowerCase();
 
-  const post = await fetch(`https://blog.butterneck.me/api/v1/posts/${slug}`)
-    .then((response) => response.json())
-    .catch((error) => console.log("error", error));
+  const post = await getPost(slug);
 
   if (post) {
     return {

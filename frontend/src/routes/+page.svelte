@@ -9,7 +9,6 @@
 	import LatestPosts from '$lib/components/LatestPosts.svelte';
 	import TrendingPosts from '$lib/components/TrendingPosts.svelte';
 	import PostsArchive from '$lib/components/PostsArchive.svelte';
-	import type { Post } from '$lib/generated/backend-client';
 
 	const meta = {
 		title: `Home | ${blogMetaData.blogTitle}`,

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Post } from '$lib/generated/backend-client';
 	import PostMetadata from './PostMetadata.svelte';
 	export let post: Post;
 </script>

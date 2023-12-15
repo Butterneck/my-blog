@@ -1,14 +1,17 @@
-// interface Post {
-//   body: string,
-//   createdAt: int
-//   description: string
-//   isCompleted: boolean
-//   title: string; 
-//   slug: string;
-//   tags: string[];
-// }
+interface Post {
+  body: string,
+  creationDate: int
+  title: string; 
+  slug: string;
+  draft?: Draft
+}
 
-// interface NewPost {
-//   title: string;
-//   body: string,
-// }
+interface Draft {
+  body: string,
+  title: string;
+}
+
+interface NewPost {
+  title: string;
+  body: string,
+}

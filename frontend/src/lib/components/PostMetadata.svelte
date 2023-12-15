@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Post } from '$lib/generated/backend-client';
     import { format } from 'fecha';
 
     export let post: Post;
@@ -10,13 +9,13 @@
     <span class="px-2">·</span>
     <span> 9 min read </span>
 
-    <!-- TODO: show drafts only to authenticated users -->
-    <!-- TODO: show only for drafts -->
-    <!-- TODO: on click go to edit page -->
-    <button
-		class=" ml-4 p-1 px-3 text-sm cursor-pointer max-w-full btn-black text-white outline-1px rounded"
-	>
-		Draft
-	</button>
+    {#if post.draft?.title != "" || post.draft?.body != ""}
+        <!-- TODO: on click go to edit page -->
+        <button
+            class=" ml-4 p-1 px-3 text-sm cursor-pointer max-w-full btn-black text-white outline-1px rounded"
+        >
+            Draft
+        </button>
+    {/if}
 
 </div>

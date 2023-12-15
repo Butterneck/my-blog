@@ -7,12 +7,14 @@
 	import { MetaTags } from 'svelte-meta-tags';
 	import { blogMetaData } from '$lib/blogMetaData';
 	import { envVariables } from '$lib/envVariables';
+	import { getCurrentUser } from '$lib/auth';
 
 	const post = data.body.post;
 
 	const meta = {
 		title: `${post.title} | ${blogMetaData.blogTitle}`,
-		description: post.description ?? post.title,
+		// description: post.description ?? post.title,
+		description: post.title,
 		url: `/blog/${post.slug}`,
 		siteName: blogMetaData.blogTitle,
 		author: blogMetaData.blogTitle,
@@ -62,15 +64,18 @@
 				>{post.title}</span
 			>
 
-			<!-- TODO: Show only to authenticated users -->
-			<!-- TODO: Redirect to edit page -->
-			<span class="align-middle">
-				<button
-					class="ml-10 mt-2 p-1 px-3 text-sm cursor-pointer max-w-full btn-black text-white outline-1px rounded"
-				>
-					Edit
-				</button>
-			</span>
+			{#await getCurrentUser() then currentUser}
+				{#if currentUser}
+					<!-- TODO: Redirect to edit page -->
+					<span class="align-middle">
+						<button
+							class="ml-10 mt-2 p-1 px-3 text-sm cursor-pointer max-w-full btn-black text-white outline-1px rounded"
+						>
+							Edit
+						</button>
+					</span>
+				{/if}
+			{/await}
 		</div>
 
 		<!-- POST IMAGE -->

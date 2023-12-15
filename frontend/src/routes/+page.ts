@@ -1,11 +1,10 @@
 export const ssr = false;
 export const prerender = false;
-import { DefaultService } from "$lib/generated/backend-client";
-import type { Post } from "$lib/generated/backend-client";
-
+import { getPosts } from '$lib/api';
 
 export async function load(): Promise<{ posts: Post[], trendingPosts: Post[] }> {
-  let posts = await DefaultService.getApiV1Posts();
+
+  const posts = await getPosts();
 
   return { posts: posts, trendingPosts: posts.slice(0, 4) };
 }

@@ -8,6 +8,7 @@ servers:
 paths:
   /api/v1/posts:
     get:
+      operationId: getPublishedPosts
       summary: Retrieve a list of published posts
       responses:
         200:
@@ -31,6 +32,7 @@ paths:
         type: "aws_proxy"
   /api/v1/admin/posts:
     get:
+      operationId: getAllPosts
       summary: Retrieve a list of posts
       responses:
         200:
@@ -55,6 +57,7 @@ paths:
         contentHandling: "CONVERT_TO_TEXT"
         type: "aws_proxy"
     post:
+      operationId: createPost
       summary: Create a new post
       requestBody:
         required: true
@@ -80,14 +83,15 @@ paths:
         passthroughBehavior: "when_no_match"
         contentHandling: "CONVERT_TO_TEXT"
         type: "aws_proxy"
-  /api/v1/posts/{postSlug}:
+  /api/v1/posts/{slug}:
     parameters:
-      - name: postSlug
+      - name: slug
         in: path
         required: true
         schema:
           type: string
     get:
+      operationId: getPublishedPost
       summary: Retrieve a published post
       responses:
         200:
@@ -109,14 +113,15 @@ paths:
         passthroughBehavior: "when_no_match"
         contentHandling: "CONVERT_TO_TEXT"
         type: "aws_proxy"
-  /api/v1/admin/posts/{postSlug}:
+  /api/v1/admin/posts/{slug}:
     parameters:
-      - name: postSlug
+      - name: slug
         in: path
         required: true
         schema:
           type: string
     get:
+      operationId: getAnyPost
       summary: Retrieve a post
       responses:
         200:
@@ -141,6 +146,7 @@ paths:
         contentHandling: "CONVERT_TO_TEXT"
         type: "aws_proxy"
     put:
+      operationId: updatePost
       summary: Update a post
       requestBody:
         required: true
@@ -169,6 +175,7 @@ paths:
         contentHandling: "CONVERT_TO_TEXT"
         type: "aws_proxy"
     delete:
+      operationId: deletePost
       summary: Delete a post
       responses:
         204:
@@ -188,14 +195,15 @@ paths:
         passthroughBehavior: "when_no_match"
         contentHandling: "CONVERT_TO_TEXT"
         type: "aws_proxy"
-  /api/v1/admin/posts/{postSlug}/publish:
+  /api/v1/admin/posts/{slug}/publish:
     parameters:
-      - name: postSlug
+      - name: slug
         in: path
         required: true
         schema:
           type: string
     post:
+      operationId: publishPost
       summary: Publish the draft of a post
       responses:
         201:

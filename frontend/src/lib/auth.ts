@@ -31,13 +31,13 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
         const user = await ampGetCurrentUser();
         return user;
     } catch (error) {
-        console.error('error getting current user', error);
+        // console.error('error getting current user', error);
     }
 
     return null;
 }
 
-export async function getIdentityToken(): Promise<string | null> {
+export async function getIdentityToken(): Promise<string> {
 
     try {
         const { accessToken, idToken } = (await ampFetchAuthSession()).tokens ?? {};
@@ -48,5 +48,10 @@ export async function getIdentityToken(): Promise<string | null> {
         console.error('error getting identity token', error);
     }
 
-    return null;
+    return "";
+}
+
+export async function isUserLoggedIn(): Promise<boolean> {
+    const user = await getCurrentUser();
+    return user !== null;
 }

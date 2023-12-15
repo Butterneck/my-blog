@@ -1,4 +1,7 @@
 import { Amplify } from 'aws-amplify';
+import { OpenAPI } from '$lib/generated/backend-client';
+import { getIdentityToken } from '$lib/auth';
+
 Amplify.configure({
     Auth: {
         Cognito: {
@@ -28,3 +31,5 @@ Amplify.configure({
         }
     }
 });
+
+OpenAPI.TOKEN = async () => getIdentityToken();

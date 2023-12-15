@@ -18,7 +18,7 @@ export class DefaultService {
      * @returns Post A list of published posts
      * @throws ApiError
      */
-    public static getApiV1Posts(): CancelablePromise<Array<Post>> {
+    public static getPublishedPosts(): CancelablePromise<Array<Post>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/posts',
@@ -33,7 +33,7 @@ export class DefaultService {
      * @returns AdminPost A list of posts
      * @throws ApiError
      */
-    public static getApiV1AdminPosts(): CancelablePromise<Array<AdminPost>> {
+    public static getAllPosts(): CancelablePromise<Array<AdminPost>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/admin/posts',
@@ -45,13 +45,14 @@ export class DefaultService {
 
     /**
      * Create a new post
-     * @param requestBody
      * @returns any Post successfully created
      * @throws ApiError
      */
-    public static postApiV1AdminPosts(
+    public static createPost({
+        requestBody,
+    }: {
         requestBody: NewPostRequest,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/admin/posts',
@@ -66,18 +67,19 @@ export class DefaultService {
 
     /**
      * Retrieve a published post
-     * @param postSlug
      * @returns Post The requested post
      * @throws ApiError
      */
-    public static getApiV1Posts1(
-        postSlug: string,
-    ): CancelablePromise<Post> {
+    public static getPublishedPost({
+        slug,
+    }: {
+        slug: string,
+    }): CancelablePromise<Post> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/posts/{postSlug}',
+            url: '/api/v1/posts/{slug}',
             path: {
-                'postSlug': postSlug,
+                'slug': slug,
             },
             errors: {
                 404: `Post not found`,
@@ -88,18 +90,19 @@ export class DefaultService {
 
     /**
      * Retrieve a post
-     * @param postSlug
      * @returns AdminPost The requested post
      * @throws ApiError
      */
-    public static getApiV1AdminPosts1(
-        postSlug: string,
-    ): CancelablePromise<AdminPost> {
+    public static getAnyPost({
+        slug,
+    }: {
+        slug: string,
+    }): CancelablePromise<AdminPost> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/admin/posts/{postSlug}',
+            url: '/api/v1/admin/posts/{slug}',
             path: {
-                'postSlug': postSlug,
+                'slug': slug,
             },
             errors: {
                 404: `Post not found`,
@@ -110,20 +113,21 @@ export class DefaultService {
 
     /**
      * Update a post
-     * @param postSlug
-     * @param requestBody
      * @returns any Post successfully updated
      * @throws ApiError
      */
-    public static putApiV1AdminPosts(
-        postSlug: string,
+    public static updatePost({
+        slug,
+        requestBody,
+    }: {
+        slug: string,
         requestBody: UpdatePostRequest,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/api/v1/admin/posts/{postSlug}',
+            url: '/api/v1/admin/posts/{slug}',
             path: {
-                'postSlug': postSlug,
+                'slug': slug,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -137,18 +141,19 @@ export class DefaultService {
 
     /**
      * Delete a post
-     * @param postSlug
      * @returns void
      * @throws ApiError
      */
-    public static deleteApiV1AdminPosts(
-        postSlug: string,
-    ): CancelablePromise<void> {
+    public static deletePost({
+        slug,
+    }: {
+        slug: string,
+    }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/api/v1/admin/posts/{postSlug}',
+            url: '/api/v1/admin/posts/{slug}',
             path: {
-                'postSlug': postSlug,
+                'slug': slug,
             },
             errors: {
                 404: `Post not found`,
@@ -159,18 +164,19 @@ export class DefaultService {
 
     /**
      * Publish the draft of a post
-     * @param postSlug
      * @returns any Post successfully created
      * @throws ApiError
      */
-    public static postApiV1AdminPostsPublish(
-        postSlug: string,
-    ): CancelablePromise<any> {
+    public static publishPost({
+        slug,
+    }: {
+        slug: string,
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/v1/admin/posts/{postSlug}/publish',
+            url: '/api/v1/admin/posts/{slug}/publish',
             path: {
-                'postSlug': postSlug,
+                'slug': slug,
             },
             errors: {
                 400: `Bad Request`,

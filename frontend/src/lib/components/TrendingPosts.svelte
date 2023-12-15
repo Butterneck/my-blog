@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Post } from '$lib/generated/backend-client';
 	import RankedPost from './RankedPost.svelte';
 	export let posts: Post[];
 </script>

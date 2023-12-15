@@ -1,7 +1,6 @@
 <script lang="ts">
 	import SmallPost from './SmallPost.svelte';
 	import LoadMorePostsBtn from './LoadMorePostsBtn.svelte';
-	import type { Post } from '$lib/generated/backend-client';
 	export let posts: Post[];
 </script>
 
