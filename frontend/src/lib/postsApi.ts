@@ -1,7 +1,15 @@
 import { getIdentityToken } from "./auth";
 
 export async function getPosts(): Promise<Post[]> {
-  const response = await fetch('https://blog.butterneck.me/api/v1/posts');
+  const idToken = await getIdentityToken();
+  const response = await fetch('https://blog.butterneck.me/api/v1/posts', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`,
+    }
+  
+  });
   const posts = await response.json();
   return posts;
 }

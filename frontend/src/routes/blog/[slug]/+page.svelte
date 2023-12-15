@@ -7,7 +7,6 @@
 	import { MetaTags } from 'svelte-meta-tags';
 	import { blogMetaData } from '$lib/blogMetaData';
 	import { envVariables } from '$lib/envVariables';
-	import PostAuthor from '$lib/components/PostAuthor.svelte';
 
 	const post = data.body.post;
 

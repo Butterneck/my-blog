@@ -19,7 +19,7 @@ variable "dynamodb_config" {
     name                     = string
     attributes               = list(map(string))
     hash_key                 = string
-    range_key                = string
+    range_key                = optional(string)
     global_secondary_indexes = optional(any)
     expose_cdc_events        = bool
     eventbridge_bus_name     = optional(string)

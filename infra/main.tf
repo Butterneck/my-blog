@@ -87,20 +87,29 @@ module "blog_backend" {
         type = "S"
       },
       {
-        name = "createdAt"
+        name = "creationDate"
         type = "N"
       },
       {
         name = "slug"
         type = "S"
+      },
+      {
+        name = "creationYear",
+        type = "N"
       }
     ]
     hash_key  = "id"
-    range_key = "createdAt"
     global_secondary_indexes = [
       {
         name            = "slug-index"
         hash_key        = "slug"
+        projection_type = "ALL"
+      },
+      {
+        name = "list-index",
+        hash_key = "creationYear",
+        range_key = "creationDate",
         projection_type = "ALL"
       }
     ]
