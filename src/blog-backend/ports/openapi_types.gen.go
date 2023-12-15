@@ -9,31 +9,31 @@ const (
 
 // AdminPost defines model for AdminPost.
 type AdminPost struct {
-	Body         *string    `json:"body,omitempty"`
-	CreationDate *int64     `json:"creationDate,omitempty"`
-	Draft        *PostDraft `json:"draft,omitempty"`
-	Slug         *string    `json:"slug,omitempty"`
-	Title        *string    `json:"title,omitempty"`
+	Body         string    `json:"body"`
+	CreationDate int64     `json:"creationDate"`
+	Draft        PostDraft `json:"draft"`
+	Slug         string    `json:"slug"`
+	Title        string    `json:"title"`
 }
 
 // NewPostRequest defines model for NewPostRequest.
 type NewPostRequest struct {
-	Body  *string `json:"body,omitempty"`
-	Title *string `json:"title,omitempty"`
+	Body  string `json:"body"`
+	Title string `json:"title"`
 }
 
 // Post defines model for Post.
 type Post struct {
-	Body         *string `json:"body,omitempty"`
-	CreationDate *int64  `json:"creationDate,omitempty"`
-	Slug         *string `json:"slug,omitempty"`
-	Title        *string `json:"title,omitempty"`
+	Body         string `json:"body"`
+	CreationDate int64  `json:"creationDate"`
+	Slug         string `json:"slug"`
+	Title        string `json:"title"`
 }
 
 // PostDraft defines model for PostDraft.
 type PostDraft struct {
-	Body  *string `json:"body,omitempty"`
-	Title *string `json:"title,omitempty"`
+	Body  string `json:"body"`
+	Title string `json:"title"`
 }
 
 // UpdatePostRequest defines model for UpdatePostRequest.

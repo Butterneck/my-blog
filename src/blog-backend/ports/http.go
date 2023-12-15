@@ -31,8 +31,8 @@ func (p HttpServer) GetApiV1AdminPosts(ctx context.Context, request GetApiV1Admi
 
 func (p HttpServer) PostApiV1AdminPosts(ctx context.Context, request PostApiV1AdminPostsRequestObject) (PostApiV1AdminPostsResponseObject, error) {
 	return PostApiV1AdminPosts201Response{}, p.app.Commands.CreatePostDraft.Handle(ctx, command.CreatePostDraft{
-		Title: *request.Body.Title,
-		Body:  *request.Body.Body,
+		Title: request.Body.Title,
+		Body:  request.Body.Body,
 	})
 }
 
@@ -92,16 +92,11 @@ func (p HttpServer) GetApiV1PostsPostSlug(ctx context.Context, request GetApiV1P
 }
 
 func domainPostToHttpPost(post *post.Post) Post {
-	body := post.Body()
-	creationDate := post.CreationDate()
-	slug := post.Slug()
-	title := post.Title()
-
 	return Post{
-		Body:         &body,
-		CreationDate: &creationDate,
-		Slug:         &slug,
-		Title:        &title,
+		Body:         post.Body(),
+		CreationDate: post.CreationDate(),
+		Slug:         post.Slug(),
+		Title:        post.Title(),
 	}
 }
 
@@ -114,18 +109,12 @@ func domainPostsToHttpPosts(posts []*post.Post) []Post {
 }
 
 func domainPostToHttpAdminPost(post *post.Post) AdminPost {
-	body := post.Body()
-	creationDate := post.CreationDate()
-	slug := post.Slug()
-	title := post.Title()
-	postDraft := domainDraftToHttpDraft(post.Draft())
-
 	return AdminPost{
-		Body:         &body,
-		CreationDate: &creationDate,
-		Draft:        &postDraft,
-		Slug:         &slug,
-		Title:        &title,
+		Body:         post.Body(),
+		CreationDate: post.CreationDate(),
+		Draft:        domainDraftToHttpDraft(post.Draft()),
+		Slug:         post.Slug(),
+		Title:        post.Title(),
 	}
 }
 
@@ -138,11 +127,8 @@ func domainPostsToHttpAdminPosts(posts []*post.Post) []AdminPost {
 }
 
 func domainDraftToHttpDraft(draft *post.Draft) PostDraft {
-	body := draft.Body()
-	title := draft.Title()
-
 	return PostDraft{
-		Body:  &body,
-		Title: &title,
+		Body:  draft.Body(),
+		Title: draft.Title(),
 	}
 }

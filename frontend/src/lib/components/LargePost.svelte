@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Post } from '$lib/generated/backend-client';
 	import PostAuthor from './PostAuthor.svelte';
 	import PostMetadata from './PostMetadata.svelte';
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import PostMetadata from './PostMetadata.svelte';
 	import PostAuthor from './PostAuthor.svelte';
+	import type { Post } from '$lib/generated/backend-client';
 
 	export let post: Post;
 </script>

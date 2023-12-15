@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Post } from '$lib/generated/backend-client';
 	import LargePost from './LargePost.svelte';
 	import SmallPost from './SmallPost.svelte';
 	export let posts: Post[];

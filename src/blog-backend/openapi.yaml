@@ -219,6 +219,11 @@ components:
   schemas:
     Post:
       type: object
+      required:
+        - title
+        - body
+        - slug
+        - creationDate
       properties:
         title:
           type: string
@@ -231,6 +236,12 @@ components:
           type: integer
     AdminPost:
       type: object
+      required:
+        - title
+        - body
+        - creationDate
+        - slug
+        - draft
       properties:
         title:
           type: string
@@ -245,6 +256,9 @@ components:
           $ref: '#/components/schemas/PostDraft'
     PostDraft:
       type: object
+      required:
+        - title
+        - body
       properties:
         title:
           type: string
@@ -259,6 +273,9 @@ components:
           type: string
     NewPostRequest:
       type: object
+      required:
+        - title
+        - body
       properties:
         title:
           type: string
