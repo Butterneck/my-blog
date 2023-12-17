@@ -8,6 +8,7 @@
 	import { blogMetaData } from '$lib/blogMetaData';
 	import { envVariables } from '$lib/envVariables';
 	import { getCurrentUser } from '$lib/auth';
+	import { publishPost } from '$lib/api';
 
 	const post = data.body.post;
 
@@ -25,6 +26,11 @@
 			alt: 'image'
 		}
 	};
+
+	async function publish() {
+		await publishPost(post.slug);
+		window.location.href = '/blog/' + post.slug;
+	}
 </script>
 
 <MetaTags
@@ -67,14 +73,26 @@
 
 			{#await getCurrentUser() then currentUser}
 				{#if currentUser}
-					<!-- TODO: Redirect to edit page -->
 					<span class="align-middle">
-						<button
-							class="ml-10 mt-2 p-1 px-3 text-sm cursor-pointer max-w-full btn-black text-white outline-1px rounded"
-						>
-							Edit
-						</button>
+						<a href="/blog/{post.slug}/edit">
+							<button
+								class="ml-10 mt-2 p-1 px-3 text-sm cursor-pointer max-w-full btn-black text-white outline-1px rounded"
+							>
+								Edit
+							</button>
+						</a>
 					</span>
+
+					{#if post.draft?.body || post.draft?.title}
+						<span class="align-middle">
+							<button
+								class="ml-2 mt-2 p-1 px-3 text-sm cursor-pointer max-w-full bg-green-500 text-white outline-1px rounded"
+								on:click={publish}
+							>
+								Publish
+							</button>
+						</span>
+					{/if}
 				{/if}
 			{/await}
 		</div>
@@ -91,7 +109,9 @@
 		</figure>
 
 		<!-- POST CONTENT -->
-		<div class="mb-20 mt-6 heading-font text-xl whitespace-pre-line main-black post-content sm:text-lg">
+		<div
+			class="mb-20 mt-6 heading-font text-xl whitespace-pre-line main-black post-content sm:text-lg"
+		>
 			{post.draft?.body || post.body}
 		</div>
 

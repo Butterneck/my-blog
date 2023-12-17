@@ -8,7 +8,7 @@
 <div class="large-post">
 	<div class="overflow-hidden sm-border-b pb-8 mb-6">
 		<!-- POST IMAGE -->
-		<a href="TODO">
+		<a href="/blog/{post.slug}">
 			<div class="w-full shimmer-bg cursor-pointer">
 				<img
 					class="big-post-img"
@@ -22,10 +22,10 @@
 		<PostAuthor />
 
 		<!-- POST TITLE -->
-		<a href={`/blog/${post.slug}`}>
+		<a href="/blog/{post.slug}">
 			<h2 class="text-2xl mt-2 leading-6 line-clamp-2">{post.draft?.title || post.title}</h2>
 		</a>
 
-		<PostMetadata post={post} />
+		<PostMetadata {post} />
 	</div>
 </div>

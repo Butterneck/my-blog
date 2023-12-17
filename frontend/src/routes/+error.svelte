@@ -3,13 +3,18 @@
     return {
       props: {
         title: `${status}: ${error.message}`,
+        status: status,
       },
     };
   }
 </script>
 
-<script>
-  export let title;
+<script lang="ts">
+	import NotFound from "$lib/components/NotFound.svelte";
+
+  export let title: string;
+  export let status: number;
 </script>
 
-<h1>{title}</h1>
+
+<NotFound />

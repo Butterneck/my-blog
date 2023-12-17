@@ -75,7 +75,7 @@
 				</p>
 			</div>
 			<div class="w-full pb-6 hidden">
-				<img class="w-4/12 float-right" src="/signature.png" />
+				<!-- <img class="w-4/12 float-right" src="/signature.png" /> -->
 			</div>
 			<a href="https://github.com/eightants/reddium/" target="_blank" rel="noopener noreferrer">
 				<button

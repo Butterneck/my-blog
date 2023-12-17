@@ -10,7 +10,8 @@ export async function getPosts(): Promise<Post[]> {
 }
 
 export async function getPost(slug: string): Promise<Post> {
-    if (await getCurrentUser()) {
+    const currentUser = await getCurrentUser();
+    if (currentUser) {
         return await DefaultService.getAnyPost({
             slug: slug,
         });
