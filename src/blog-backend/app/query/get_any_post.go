@@ -9,7 +9,7 @@ import (
 // Get a published or draft post
 
 type GetAnyPost struct {
-	PostSlug string
+	Slug string
 }
 
 type GetAnyPostHandler struct {
@@ -25,5 +25,5 @@ func NewGetAnyPostHandler(postRepository post.Repository) GetAnyPostHandler {
 }
 
 func (q GetAnyPostHandler) Handle(ctx context.Context, query GetAnyPost) (*post.Post, error) {
-	return q.postRepository.GetAnyPost(ctx, query.PostSlug)
+	return q.postRepository.GetAnyPost(ctx, query.Slug)
 }

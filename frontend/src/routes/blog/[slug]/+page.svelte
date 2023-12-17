@@ -55,13 +55,14 @@
 	}}
 />
 
-<div class="sm:w-full sm:mx-auto max-w-680 pb-2 mt-6 mx-6 w-auto">
+<!-- <div class="md:w-auto sm:mx-auto max-w-680 pb-2 mt-6 mx-6 w-auto"> -->
+<div class="md:w-auto max-w-680 mx-6 md:mx-auto xl:mx-auto">
 	<!-- POST TITLE -->
 	<span>
 		<div>
 			<span
 				class="align-middle heading-font sm:text-5xl font-bold sm:leading-tight text-3xl leading-9 pt-8"
-				>{post.title}</span
+				>{post.draft?.title || post.title}</span
 			>
 
 			{#await getCurrentUser() then currentUser}
@@ -90,8 +91,8 @@
 		</figure>
 
 		<!-- POST CONTENT -->
-		<div class="mt-6 heading-font text-xl whitespace-pre-line main-black post-content sm:text-lg">
-			{post.body}
+		<div class="mb-20 mt-6 heading-font text-xl whitespace-pre-line main-black post-content sm:text-lg">
+			{post.draft?.body || post.body}
 		</div>
 
 		<!-- POST FOOTER -->

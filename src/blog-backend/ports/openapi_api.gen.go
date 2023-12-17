@@ -18,28 +18,28 @@ import (
 type ServerInterface interface {
 	// Retrieve a list of posts
 	// (GET /api/v1/admin/posts)
-	GetApiV1AdminPosts(c *gin.Context)
+	GetAllPosts(c *gin.Context)
 	// Create a new post
 	// (POST /api/v1/admin/posts)
-	PostApiV1AdminPosts(c *gin.Context)
+	CreatePost(c *gin.Context)
 	// Delete a post
-	// (DELETE /api/v1/admin/posts/{postSlug})
-	DeleteApiV1AdminPostsPostSlug(c *gin.Context, postSlug string)
+	// (DELETE /api/v1/admin/posts/{slug})
+	DeletePost(c *gin.Context, slug string)
 	// Retrieve a post
-	// (GET /api/v1/admin/posts/{postSlug})
-	GetApiV1AdminPostsPostSlug(c *gin.Context, postSlug string)
+	// (GET /api/v1/admin/posts/{slug})
+	GetAnyPost(c *gin.Context, slug string)
 	// Update a post
-	// (PUT /api/v1/admin/posts/{postSlug})
-	PutApiV1AdminPostsPostSlug(c *gin.Context, postSlug string)
+	// (PUT /api/v1/admin/posts/{slug})
+	UpdatePost(c *gin.Context, slug string)
 	// Publish the draft of a post
-	// (POST /api/v1/admin/posts/{postSlug}/publish)
-	PostApiV1AdminPostsPostSlugPublish(c *gin.Context, postSlug string)
+	// (POST /api/v1/admin/posts/{slug}/publish)
+	PublishPost(c *gin.Context, slug string)
 	// Retrieve a list of published posts
 	// (GET /api/v1/posts)
-	GetApiV1Posts(c *gin.Context)
+	GetPublishedPosts(c *gin.Context)
 	// Retrieve a published post
-	// (GET /api/v1/posts/{postSlug})
-	GetApiV1PostsPostSlug(c *gin.Context, postSlug string)
+	// (GET /api/v1/posts/{slug})
+	GetPublishedPost(c *gin.Context, slug string)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -51,8 +51,8 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(c *gin.Context)
 
-// GetApiV1AdminPosts operation middleware
-func (siw *ServerInterfaceWrapper) GetApiV1AdminPosts(c *gin.Context) {
+// GetAllPosts operation middleware
+func (siw *ServerInterfaceWrapper) GetAllPosts(c *gin.Context) {
 
 	c.Set(Admin_authorizerScopes, []string{})
 
@@ -63,11 +63,11 @@ func (siw *ServerInterfaceWrapper) GetApiV1AdminPosts(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.GetApiV1AdminPosts(c)
+	siw.Handler.GetAllPosts(c)
 }
 
-// PostApiV1AdminPosts operation middleware
-func (siw *ServerInterfaceWrapper) PostApiV1AdminPosts(c *gin.Context) {
+// CreatePost operation middleware
+func (siw *ServerInterfaceWrapper) CreatePost(c *gin.Context) {
 
 	c.Set(Admin_authorizerScopes, []string{})
 
@@ -78,20 +78,20 @@ func (siw *ServerInterfaceWrapper) PostApiV1AdminPosts(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.PostApiV1AdminPosts(c)
+	siw.Handler.CreatePost(c)
 }
 
-// DeleteApiV1AdminPostsPostSlug operation middleware
-func (siw *ServerInterfaceWrapper) DeleteApiV1AdminPostsPostSlug(c *gin.Context) {
+// DeletePost operation middleware
+func (siw *ServerInterfaceWrapper) DeletePost(c *gin.Context) {
 
 	var err error
 
-	// ------------- Path parameter "postSlug" -------------
-	var postSlug string
+	// ------------- Path parameter "slug" -------------
+	var slug string
 
-	err = runtime.BindStyledParameter("simple", false, "postSlug", c.Param("postSlug"), &postSlug)
+	err = runtime.BindStyledParameter("simple", false, "slug", c.Param("slug"), &slug)
 	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter postSlug: %w", err), http.StatusBadRequest)
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter slug: %w", err), http.StatusBadRequest)
 		return
 	}
 
@@ -104,20 +104,20 @@ func (siw *ServerInterfaceWrapper) DeleteApiV1AdminPostsPostSlug(c *gin.Context)
 		}
 	}
 
-	siw.Handler.DeleteApiV1AdminPostsPostSlug(c, postSlug)
+	siw.Handler.DeletePost(c, slug)
 }
 
-// GetApiV1AdminPostsPostSlug operation middleware
-func (siw *ServerInterfaceWrapper) GetApiV1AdminPostsPostSlug(c *gin.Context) {
+// GetAnyPost operation middleware
+func (siw *ServerInterfaceWrapper) GetAnyPost(c *gin.Context) {
 
 	var err error
 
-	// ------------- Path parameter "postSlug" -------------
-	var postSlug string
+	// ------------- Path parameter "slug" -------------
+	var slug string
 
-	err = runtime.BindStyledParameter("simple", false, "postSlug", c.Param("postSlug"), &postSlug)
+	err = runtime.BindStyledParameter("simple", false, "slug", c.Param("slug"), &slug)
 	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter postSlug: %w", err), http.StatusBadRequest)
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter slug: %w", err), http.StatusBadRequest)
 		return
 	}
 
@@ -130,20 +130,20 @@ func (siw *ServerInterfaceWrapper) GetApiV1AdminPostsPostSlug(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.GetApiV1AdminPostsPostSlug(c, postSlug)
+	siw.Handler.GetAnyPost(c, slug)
 }
 
-// PutApiV1AdminPostsPostSlug operation middleware
-func (siw *ServerInterfaceWrapper) PutApiV1AdminPostsPostSlug(c *gin.Context) {
+// UpdatePost operation middleware
+func (siw *ServerInterfaceWrapper) UpdatePost(c *gin.Context) {
 
 	var err error
 
-	// ------------- Path parameter "postSlug" -------------
-	var postSlug string
+	// ------------- Path parameter "slug" -------------
+	var slug string
 
-	err = runtime.BindStyledParameter("simple", false, "postSlug", c.Param("postSlug"), &postSlug)
+	err = runtime.BindStyledParameter("simple", false, "slug", c.Param("slug"), &slug)
 	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter postSlug: %w", err), http.StatusBadRequest)
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter slug: %w", err), http.StatusBadRequest)
 		return
 	}
 
@@ -156,20 +156,20 @@ func (siw *ServerInterfaceWrapper) PutApiV1AdminPostsPostSlug(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.PutApiV1AdminPostsPostSlug(c, postSlug)
+	siw.Handler.UpdatePost(c, slug)
 }
 
-// PostApiV1AdminPostsPostSlugPublish operation middleware
-func (siw *ServerInterfaceWrapper) PostApiV1AdminPostsPostSlugPublish(c *gin.Context) {
+// PublishPost operation middleware
+func (siw *ServerInterfaceWrapper) PublishPost(c *gin.Context) {
 
 	var err error
 
-	// ------------- Path parameter "postSlug" -------------
-	var postSlug string
+	// ------------- Path parameter "slug" -------------
+	var slug string
 
-	err = runtime.BindStyledParameter("simple", false, "postSlug", c.Param("postSlug"), &postSlug)
+	err = runtime.BindStyledParameter("simple", false, "slug", c.Param("slug"), &slug)
 	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter postSlug: %w", err), http.StatusBadRequest)
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter slug: %w", err), http.StatusBadRequest)
 		return
 	}
 
@@ -182,11 +182,11 @@ func (siw *ServerInterfaceWrapper) PostApiV1AdminPostsPostSlugPublish(c *gin.Con
 		}
 	}
 
-	siw.Handler.PostApiV1AdminPostsPostSlugPublish(c, postSlug)
+	siw.Handler.PublishPost(c, slug)
 }
 
-// GetApiV1Posts operation middleware
-func (siw *ServerInterfaceWrapper) GetApiV1Posts(c *gin.Context) {
+// GetPublishedPosts operation middleware
+func (siw *ServerInterfaceWrapper) GetPublishedPosts(c *gin.Context) {
 
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
@@ -195,20 +195,20 @@ func (siw *ServerInterfaceWrapper) GetApiV1Posts(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.GetApiV1Posts(c)
+	siw.Handler.GetPublishedPosts(c)
 }
 
-// GetApiV1PostsPostSlug operation middleware
-func (siw *ServerInterfaceWrapper) GetApiV1PostsPostSlug(c *gin.Context) {
+// GetPublishedPost operation middleware
+func (siw *ServerInterfaceWrapper) GetPublishedPost(c *gin.Context) {
 
 	var err error
 
-	// ------------- Path parameter "postSlug" -------------
-	var postSlug string
+	// ------------- Path parameter "slug" -------------
+	var slug string
 
-	err = runtime.BindStyledParameter("simple", false, "postSlug", c.Param("postSlug"), &postSlug)
+	err = runtime.BindStyledParameter("simple", false, "slug", c.Param("slug"), &slug)
 	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter postSlug: %w", err), http.StatusBadRequest)
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter slug: %w", err), http.StatusBadRequest)
 		return
 	}
 
@@ -219,7 +219,7 @@ func (siw *ServerInterfaceWrapper) GetApiV1PostsPostSlug(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.GetApiV1PostsPostSlug(c, postSlug)
+	siw.Handler.GetPublishedPost(c, slug)
 }
 
 // GinServerOptions provides options for the Gin server.
@@ -249,263 +249,263 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
-	router.GET(options.BaseURL+"/api/v1/admin/posts", wrapper.GetApiV1AdminPosts)
-	router.POST(options.BaseURL+"/api/v1/admin/posts", wrapper.PostApiV1AdminPosts)
-	router.DELETE(options.BaseURL+"/api/v1/admin/posts/:postSlug", wrapper.DeleteApiV1AdminPostsPostSlug)
-	router.GET(options.BaseURL+"/api/v1/admin/posts/:postSlug", wrapper.GetApiV1AdminPostsPostSlug)
-	router.PUT(options.BaseURL+"/api/v1/admin/posts/:postSlug", wrapper.PutApiV1AdminPostsPostSlug)
-	router.POST(options.BaseURL+"/api/v1/admin/posts/:postSlug/publish", wrapper.PostApiV1AdminPostsPostSlugPublish)
-	router.GET(options.BaseURL+"/api/v1/posts", wrapper.GetApiV1Posts)
-	router.GET(options.BaseURL+"/api/v1/posts/:postSlug", wrapper.GetApiV1PostsPostSlug)
+	router.GET(options.BaseURL+"/api/v1/admin/posts", wrapper.GetAllPosts)
+	router.POST(options.BaseURL+"/api/v1/admin/posts", wrapper.CreatePost)
+	router.DELETE(options.BaseURL+"/api/v1/admin/posts/:slug", wrapper.DeletePost)
+	router.GET(options.BaseURL+"/api/v1/admin/posts/:slug", wrapper.GetAnyPost)
+	router.PUT(options.BaseURL+"/api/v1/admin/posts/:slug", wrapper.UpdatePost)
+	router.POST(options.BaseURL+"/api/v1/admin/posts/:slug/publish", wrapper.PublishPost)
+	router.GET(options.BaseURL+"/api/v1/posts", wrapper.GetPublishedPosts)
+	router.GET(options.BaseURL+"/api/v1/posts/:slug", wrapper.GetPublishedPost)
 }
 
-type GetApiV1AdminPostsRequestObject struct {
+type GetAllPostsRequestObject struct {
 }
 
-type GetApiV1AdminPostsResponseObject interface {
-	VisitGetApiV1AdminPostsResponse(w http.ResponseWriter) error
+type GetAllPostsResponseObject interface {
+	VisitGetAllPostsResponse(w http.ResponseWriter) error
 }
 
-type GetApiV1AdminPosts200JSONResponse []AdminPost
+type GetAllPosts200JSONResponse []AdminPost
 
-func (response GetApiV1AdminPosts200JSONResponse) VisitGetApiV1AdminPostsResponse(w http.ResponseWriter) error {
+func (response GetAllPosts200JSONResponse) VisitGetAllPostsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetApiV1AdminPosts500Response struct {
+type GetAllPosts500Response struct {
 }
 
-func (response GetApiV1AdminPosts500Response) VisitGetApiV1AdminPostsResponse(w http.ResponseWriter) error {
+func (response GetAllPosts500Response) VisitGetAllPostsResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
 	return nil
 }
 
-type PostApiV1AdminPostsRequestObject struct {
-	Body *PostApiV1AdminPostsJSONRequestBody
+type CreatePostRequestObject struct {
+	Body *CreatePostJSONRequestBody
 }
 
-type PostApiV1AdminPostsResponseObject interface {
-	VisitPostApiV1AdminPostsResponse(w http.ResponseWriter) error
+type CreatePostResponseObject interface {
+	VisitCreatePostResponse(w http.ResponseWriter) error
 }
 
-type PostApiV1AdminPosts201Response struct {
+type CreatePost201Response struct {
 }
 
-func (response PostApiV1AdminPosts201Response) VisitPostApiV1AdminPostsResponse(w http.ResponseWriter) error {
+func (response CreatePost201Response) VisitCreatePostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(201)
 	return nil
 }
 
-type PostApiV1AdminPosts400Response struct {
+type CreatePost400Response struct {
 }
 
-func (response PostApiV1AdminPosts400Response) VisitPostApiV1AdminPostsResponse(w http.ResponseWriter) error {
+func (response CreatePost400Response) VisitCreatePostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(400)
 	return nil
 }
 
-type PostApiV1AdminPosts500Response struct {
+type CreatePost500Response struct {
 }
 
-func (response PostApiV1AdminPosts500Response) VisitPostApiV1AdminPostsResponse(w http.ResponseWriter) error {
+func (response CreatePost500Response) VisitCreatePostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
 	return nil
 }
 
-type DeleteApiV1AdminPostsPostSlugRequestObject struct {
-	PostSlug string `json:"postSlug"`
+type DeletePostRequestObject struct {
+	Slug string `json:"slug"`
 }
 
-type DeleteApiV1AdminPostsPostSlugResponseObject interface {
-	VisitDeleteApiV1AdminPostsPostSlugResponse(w http.ResponseWriter) error
+type DeletePostResponseObject interface {
+	VisitDeletePostResponse(w http.ResponseWriter) error
 }
 
-type DeleteApiV1AdminPostsPostSlug204Response struct {
+type DeletePost204Response struct {
 }
 
-func (response DeleteApiV1AdminPostsPostSlug204Response) VisitDeleteApiV1AdminPostsPostSlugResponse(w http.ResponseWriter) error {
+func (response DeletePost204Response) VisitDeletePostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
 	return nil
 }
 
-type DeleteApiV1AdminPostsPostSlug404Response struct {
+type DeletePost404Response struct {
 }
 
-func (response DeleteApiV1AdminPostsPostSlug404Response) VisitDeleteApiV1AdminPostsPostSlugResponse(w http.ResponseWriter) error {
+func (response DeletePost404Response) VisitDeletePostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(404)
 	return nil
 }
 
-type DeleteApiV1AdminPostsPostSlug500Response struct {
+type DeletePost500Response struct {
 }
 
-func (response DeleteApiV1AdminPostsPostSlug500Response) VisitDeleteApiV1AdminPostsPostSlugResponse(w http.ResponseWriter) error {
+func (response DeletePost500Response) VisitDeletePostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
 	return nil
 }
 
-type GetApiV1AdminPostsPostSlugRequestObject struct {
-	PostSlug string `json:"postSlug"`
+type GetAnyPostRequestObject struct {
+	Slug string `json:"slug"`
 }
 
-type GetApiV1AdminPostsPostSlugResponseObject interface {
-	VisitGetApiV1AdminPostsPostSlugResponse(w http.ResponseWriter) error
+type GetAnyPostResponseObject interface {
+	VisitGetAnyPostResponse(w http.ResponseWriter) error
 }
 
-type GetApiV1AdminPostsPostSlug200JSONResponse AdminPost
+type GetAnyPost200JSONResponse AdminPost
 
-func (response GetApiV1AdminPostsPostSlug200JSONResponse) VisitGetApiV1AdminPostsPostSlugResponse(w http.ResponseWriter) error {
+func (response GetAnyPost200JSONResponse) VisitGetAnyPostResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetApiV1AdminPostsPostSlug404Response struct {
+type GetAnyPost404Response struct {
 }
 
-func (response GetApiV1AdminPostsPostSlug404Response) VisitGetApiV1AdminPostsPostSlugResponse(w http.ResponseWriter) error {
+func (response GetAnyPost404Response) VisitGetAnyPostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(404)
 	return nil
 }
 
-type GetApiV1AdminPostsPostSlug500Response struct {
+type GetAnyPost500Response struct {
 }
 
-func (response GetApiV1AdminPostsPostSlug500Response) VisitGetApiV1AdminPostsPostSlugResponse(w http.ResponseWriter) error {
+func (response GetAnyPost500Response) VisitGetAnyPostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
 	return nil
 }
 
-type PutApiV1AdminPostsPostSlugRequestObject struct {
-	PostSlug string `json:"postSlug"`
-	Body     *PutApiV1AdminPostsPostSlugJSONRequestBody
+type UpdatePostRequestObject struct {
+	Slug string `json:"slug"`
+	Body *UpdatePostJSONRequestBody
 }
 
-type PutApiV1AdminPostsPostSlugResponseObject interface {
-	VisitPutApiV1AdminPostsPostSlugResponse(w http.ResponseWriter) error
+type UpdatePostResponseObject interface {
+	VisitUpdatePostResponse(w http.ResponseWriter) error
 }
 
-type PutApiV1AdminPostsPostSlug200Response struct {
+type UpdatePost200Response struct {
 }
 
-func (response PutApiV1AdminPostsPostSlug200Response) VisitPutApiV1AdminPostsPostSlugResponse(w http.ResponseWriter) error {
+func (response UpdatePost200Response) VisitUpdatePostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(200)
 	return nil
 }
 
-type PutApiV1AdminPostsPostSlug400Response struct {
+type UpdatePost400Response struct {
 }
 
-func (response PutApiV1AdminPostsPostSlug400Response) VisitPutApiV1AdminPostsPostSlugResponse(w http.ResponseWriter) error {
+func (response UpdatePost400Response) VisitUpdatePostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(400)
 	return nil
 }
 
-type PutApiV1AdminPostsPostSlug404Response struct {
+type UpdatePost404Response struct {
 }
 
-func (response PutApiV1AdminPostsPostSlug404Response) VisitPutApiV1AdminPostsPostSlugResponse(w http.ResponseWriter) error {
+func (response UpdatePost404Response) VisitUpdatePostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(404)
 	return nil
 }
 
-type PutApiV1AdminPostsPostSlug500Response struct {
+type UpdatePost500Response struct {
 }
 
-func (response PutApiV1AdminPostsPostSlug500Response) VisitPutApiV1AdminPostsPostSlugResponse(w http.ResponseWriter) error {
+func (response UpdatePost500Response) VisitUpdatePostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
 	return nil
 }
 
-type PostApiV1AdminPostsPostSlugPublishRequestObject struct {
-	PostSlug string `json:"postSlug"`
+type PublishPostRequestObject struct {
+	Slug string `json:"slug"`
 }
 
-type PostApiV1AdminPostsPostSlugPublishResponseObject interface {
-	VisitPostApiV1AdminPostsPostSlugPublishResponse(w http.ResponseWriter) error
+type PublishPostResponseObject interface {
+	VisitPublishPostResponse(w http.ResponseWriter) error
 }
 
-type PostApiV1AdminPostsPostSlugPublish201Response struct {
+type PublishPost201Response struct {
 }
 
-func (response PostApiV1AdminPostsPostSlugPublish201Response) VisitPostApiV1AdminPostsPostSlugPublishResponse(w http.ResponseWriter) error {
+func (response PublishPost201Response) VisitPublishPostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(201)
 	return nil
 }
 
-type PostApiV1AdminPostsPostSlugPublish400Response struct {
+type PublishPost400Response struct {
 }
 
-func (response PostApiV1AdminPostsPostSlugPublish400Response) VisitPostApiV1AdminPostsPostSlugPublishResponse(w http.ResponseWriter) error {
+func (response PublishPost400Response) VisitPublishPostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(400)
 	return nil
 }
 
-type PostApiV1AdminPostsPostSlugPublish500Response struct {
+type PublishPost500Response struct {
 }
 
-func (response PostApiV1AdminPostsPostSlugPublish500Response) VisitPostApiV1AdminPostsPostSlugPublishResponse(w http.ResponseWriter) error {
+func (response PublishPost500Response) VisitPublishPostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
 	return nil
 }
 
-type GetApiV1PostsRequestObject struct {
+type GetPublishedPostsRequestObject struct {
 }
 
-type GetApiV1PostsResponseObject interface {
-	VisitGetApiV1PostsResponse(w http.ResponseWriter) error
+type GetPublishedPostsResponseObject interface {
+	VisitGetPublishedPostsResponse(w http.ResponseWriter) error
 }
 
-type GetApiV1Posts200JSONResponse []Post
+type GetPublishedPosts200JSONResponse []Post
 
-func (response GetApiV1Posts200JSONResponse) VisitGetApiV1PostsResponse(w http.ResponseWriter) error {
+func (response GetPublishedPosts200JSONResponse) VisitGetPublishedPostsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetApiV1Posts500Response struct {
+type GetPublishedPosts500Response struct {
 }
 
-func (response GetApiV1Posts500Response) VisitGetApiV1PostsResponse(w http.ResponseWriter) error {
+func (response GetPublishedPosts500Response) VisitGetPublishedPostsResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
 	return nil
 }
 
-type GetApiV1PostsPostSlugRequestObject struct {
-	PostSlug string `json:"postSlug"`
+type GetPublishedPostRequestObject struct {
+	Slug string `json:"slug"`
 }
 
-type GetApiV1PostsPostSlugResponseObject interface {
-	VisitGetApiV1PostsPostSlugResponse(w http.ResponseWriter) error
+type GetPublishedPostResponseObject interface {
+	VisitGetPublishedPostResponse(w http.ResponseWriter) error
 }
 
-type GetApiV1PostsPostSlug200JSONResponse Post
+type GetPublishedPost200JSONResponse Post
 
-func (response GetApiV1PostsPostSlug200JSONResponse) VisitGetApiV1PostsPostSlugResponse(w http.ResponseWriter) error {
+func (response GetPublishedPost200JSONResponse) VisitGetPublishedPostResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetApiV1PostsPostSlug404Response struct {
+type GetPublishedPost404Response struct {
 }
 
-func (response GetApiV1PostsPostSlug404Response) VisitGetApiV1PostsPostSlugResponse(w http.ResponseWriter) error {
+func (response GetPublishedPost404Response) VisitGetPublishedPostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(404)
 	return nil
 }
 
-type GetApiV1PostsPostSlug500Response struct {
+type GetPublishedPost500Response struct {
 }
 
-func (response GetApiV1PostsPostSlug500Response) VisitGetApiV1PostsPostSlugResponse(w http.ResponseWriter) error {
+func (response GetPublishedPost500Response) VisitGetPublishedPostResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
 	return nil
 }
@@ -514,28 +514,28 @@ func (response GetApiV1PostsPostSlug500Response) VisitGetApiV1PostsPostSlugRespo
 type StrictServerInterface interface {
 	// Retrieve a list of posts
 	// (GET /api/v1/admin/posts)
-	GetApiV1AdminPosts(ctx context.Context, request GetApiV1AdminPostsRequestObject) (GetApiV1AdminPostsResponseObject, error)
+	GetAllPosts(ctx context.Context, request GetAllPostsRequestObject) (GetAllPostsResponseObject, error)
 	// Create a new post
 	// (POST /api/v1/admin/posts)
-	PostApiV1AdminPosts(ctx context.Context, request PostApiV1AdminPostsRequestObject) (PostApiV1AdminPostsResponseObject, error)
+	CreatePost(ctx context.Context, request CreatePostRequestObject) (CreatePostResponseObject, error)
 	// Delete a post
-	// (DELETE /api/v1/admin/posts/{postSlug})
-	DeleteApiV1AdminPostsPostSlug(ctx context.Context, request DeleteApiV1AdminPostsPostSlugRequestObject) (DeleteApiV1AdminPostsPostSlugResponseObject, error)
+	// (DELETE /api/v1/admin/posts/{slug})
+	DeletePost(ctx context.Context, request DeletePostRequestObject) (DeletePostResponseObject, error)
 	// Retrieve a post
-	// (GET /api/v1/admin/posts/{postSlug})
-	GetApiV1AdminPostsPostSlug(ctx context.Context, request GetApiV1AdminPostsPostSlugRequestObject) (GetApiV1AdminPostsPostSlugResponseObject, error)
+	// (GET /api/v1/admin/posts/{slug})
+	GetAnyPost(ctx context.Context, request GetAnyPostRequestObject) (GetAnyPostResponseObject, error)
 	// Update a post
-	// (PUT /api/v1/admin/posts/{postSlug})
-	PutApiV1AdminPostsPostSlug(ctx context.Context, request PutApiV1AdminPostsPostSlugRequestObject) (PutApiV1AdminPostsPostSlugResponseObject, error)
+	// (PUT /api/v1/admin/posts/{slug})
+	UpdatePost(ctx context.Context, request UpdatePostRequestObject) (UpdatePostResponseObject, error)
 	// Publish the draft of a post
-	// (POST /api/v1/admin/posts/{postSlug}/publish)
-	PostApiV1AdminPostsPostSlugPublish(ctx context.Context, request PostApiV1AdminPostsPostSlugPublishRequestObject) (PostApiV1AdminPostsPostSlugPublishResponseObject, error)
+	// (POST /api/v1/admin/posts/{slug}/publish)
+	PublishPost(ctx context.Context, request PublishPostRequestObject) (PublishPostResponseObject, error)
 	// Retrieve a list of published posts
 	// (GET /api/v1/posts)
-	GetApiV1Posts(ctx context.Context, request GetApiV1PostsRequestObject) (GetApiV1PostsResponseObject, error)
+	GetPublishedPosts(ctx context.Context, request GetPublishedPostsRequestObject) (GetPublishedPostsResponseObject, error)
 	// Retrieve a published post
-	// (GET /api/v1/posts/{postSlug})
-	GetApiV1PostsPostSlug(ctx context.Context, request GetApiV1PostsPostSlugRequestObject) (GetApiV1PostsPostSlugResponseObject, error)
+	// (GET /api/v1/posts/{slug})
+	GetPublishedPost(ctx context.Context, request GetPublishedPostRequestObject) (GetPublishedPostResponseObject, error)
 }
 
 type StrictHandlerFunc = strictgin.StrictGinHandlerFunc
@@ -550,15 +550,15 @@ type strictHandler struct {
 	middlewares []StrictMiddlewareFunc
 }
 
-// GetApiV1AdminPosts operation middleware
-func (sh *strictHandler) GetApiV1AdminPosts(ctx *gin.Context) {
-	var request GetApiV1AdminPostsRequestObject
+// GetAllPosts operation middleware
+func (sh *strictHandler) GetAllPosts(ctx *gin.Context) {
+	var request GetAllPostsRequestObject
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetApiV1AdminPosts(ctx, request.(GetApiV1AdminPostsRequestObject))
+		return sh.ssi.GetAllPosts(ctx, request.(GetAllPostsRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetApiV1AdminPosts")
+		handler = middleware(handler, "GetAllPosts")
 	}
 
 	response, err := handler(ctx, request)
@@ -566,8 +566,8 @@ func (sh *strictHandler) GetApiV1AdminPosts(ctx *gin.Context) {
 	if err != nil {
 		ctx.Error(err)
 		ctx.Status(http.StatusInternalServerError)
-	} else if validResponse, ok := response.(GetApiV1AdminPostsResponseObject); ok {
-		if err := validResponse.VisitGetApiV1AdminPostsResponse(ctx.Writer); err != nil {
+	} else if validResponse, ok := response.(GetAllPostsResponseObject); ok {
+		if err := validResponse.VisitGetAllPostsResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {
@@ -575,11 +575,11 @@ func (sh *strictHandler) GetApiV1AdminPosts(ctx *gin.Context) {
 	}
 }
 
-// PostApiV1AdminPosts operation middleware
-func (sh *strictHandler) PostApiV1AdminPosts(ctx *gin.Context) {
-	var request PostApiV1AdminPostsRequestObject
+// CreatePost operation middleware
+func (sh *strictHandler) CreatePost(ctx *gin.Context) {
+	var request CreatePostRequestObject
 
-	var body PostApiV1AdminPostsJSONRequestBody
+	var body CreatePostJSONRequestBody
 	if err := ctx.ShouldBind(&body); err != nil {
 		ctx.Status(http.StatusBadRequest)
 		ctx.Error(err)
@@ -588,10 +588,10 @@ func (sh *strictHandler) PostApiV1AdminPosts(ctx *gin.Context) {
 	request.Body = &body
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PostApiV1AdminPosts(ctx, request.(PostApiV1AdminPostsRequestObject))
+		return sh.ssi.CreatePost(ctx, request.(CreatePostRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostApiV1AdminPosts")
+		handler = middleware(handler, "CreatePost")
 	}
 
 	response, err := handler(ctx, request)
@@ -599,8 +599,8 @@ func (sh *strictHandler) PostApiV1AdminPosts(ctx *gin.Context) {
 	if err != nil {
 		ctx.Error(err)
 		ctx.Status(http.StatusInternalServerError)
-	} else if validResponse, ok := response.(PostApiV1AdminPostsResponseObject); ok {
-		if err := validResponse.VisitPostApiV1AdminPostsResponse(ctx.Writer); err != nil {
+	} else if validResponse, ok := response.(CreatePostResponseObject); ok {
+		if err := validResponse.VisitCreatePostResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {
@@ -608,17 +608,17 @@ func (sh *strictHandler) PostApiV1AdminPosts(ctx *gin.Context) {
 	}
 }
 
-// DeleteApiV1AdminPostsPostSlug operation middleware
-func (sh *strictHandler) DeleteApiV1AdminPostsPostSlug(ctx *gin.Context, postSlug string) {
-	var request DeleteApiV1AdminPostsPostSlugRequestObject
+// DeletePost operation middleware
+func (sh *strictHandler) DeletePost(ctx *gin.Context, slug string) {
+	var request DeletePostRequestObject
 
-	request.PostSlug = postSlug
+	request.Slug = slug
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.DeleteApiV1AdminPostsPostSlug(ctx, request.(DeleteApiV1AdminPostsPostSlugRequestObject))
+		return sh.ssi.DeletePost(ctx, request.(DeletePostRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "DeleteApiV1AdminPostsPostSlug")
+		handler = middleware(handler, "DeletePost")
 	}
 
 	response, err := handler(ctx, request)
@@ -626,8 +626,8 @@ func (sh *strictHandler) DeleteApiV1AdminPostsPostSlug(ctx *gin.Context, postSlu
 	if err != nil {
 		ctx.Error(err)
 		ctx.Status(http.StatusInternalServerError)
-	} else if validResponse, ok := response.(DeleteApiV1AdminPostsPostSlugResponseObject); ok {
-		if err := validResponse.VisitDeleteApiV1AdminPostsPostSlugResponse(ctx.Writer); err != nil {
+	} else if validResponse, ok := response.(DeletePostResponseObject); ok {
+		if err := validResponse.VisitDeletePostResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {
@@ -635,17 +635,17 @@ func (sh *strictHandler) DeleteApiV1AdminPostsPostSlug(ctx *gin.Context, postSlu
 	}
 }
 
-// GetApiV1AdminPostsPostSlug operation middleware
-func (sh *strictHandler) GetApiV1AdminPostsPostSlug(ctx *gin.Context, postSlug string) {
-	var request GetApiV1AdminPostsPostSlugRequestObject
+// GetAnyPost operation middleware
+func (sh *strictHandler) GetAnyPost(ctx *gin.Context, slug string) {
+	var request GetAnyPostRequestObject
 
-	request.PostSlug = postSlug
+	request.Slug = slug
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetApiV1AdminPostsPostSlug(ctx, request.(GetApiV1AdminPostsPostSlugRequestObject))
+		return sh.ssi.GetAnyPost(ctx, request.(GetAnyPostRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetApiV1AdminPostsPostSlug")
+		handler = middleware(handler, "GetAnyPost")
 	}
 
 	response, err := handler(ctx, request)
@@ -653,8 +653,8 @@ func (sh *strictHandler) GetApiV1AdminPostsPostSlug(ctx *gin.Context, postSlug s
 	if err != nil {
 		ctx.Error(err)
 		ctx.Status(http.StatusInternalServerError)
-	} else if validResponse, ok := response.(GetApiV1AdminPostsPostSlugResponseObject); ok {
-		if err := validResponse.VisitGetApiV1AdminPostsPostSlugResponse(ctx.Writer); err != nil {
+	} else if validResponse, ok := response.(GetAnyPostResponseObject); ok {
+		if err := validResponse.VisitGetAnyPostResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {
@@ -662,13 +662,13 @@ func (sh *strictHandler) GetApiV1AdminPostsPostSlug(ctx *gin.Context, postSlug s
 	}
 }
 
-// PutApiV1AdminPostsPostSlug operation middleware
-func (sh *strictHandler) PutApiV1AdminPostsPostSlug(ctx *gin.Context, postSlug string) {
-	var request PutApiV1AdminPostsPostSlugRequestObject
+// UpdatePost operation middleware
+func (sh *strictHandler) UpdatePost(ctx *gin.Context, slug string) {
+	var request UpdatePostRequestObject
 
-	request.PostSlug = postSlug
+	request.Slug = slug
 
-	var body PutApiV1AdminPostsPostSlugJSONRequestBody
+	var body UpdatePostJSONRequestBody
 	if err := ctx.ShouldBind(&body); err != nil {
 		ctx.Status(http.StatusBadRequest)
 		ctx.Error(err)
@@ -677,10 +677,10 @@ func (sh *strictHandler) PutApiV1AdminPostsPostSlug(ctx *gin.Context, postSlug s
 	request.Body = &body
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PutApiV1AdminPostsPostSlug(ctx, request.(PutApiV1AdminPostsPostSlugRequestObject))
+		return sh.ssi.UpdatePost(ctx, request.(UpdatePostRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PutApiV1AdminPostsPostSlug")
+		handler = middleware(handler, "UpdatePost")
 	}
 
 	response, err := handler(ctx, request)
@@ -688,8 +688,8 @@ func (sh *strictHandler) PutApiV1AdminPostsPostSlug(ctx *gin.Context, postSlug s
 	if err != nil {
 		ctx.Error(err)
 		ctx.Status(http.StatusInternalServerError)
-	} else if validResponse, ok := response.(PutApiV1AdminPostsPostSlugResponseObject); ok {
-		if err := validResponse.VisitPutApiV1AdminPostsPostSlugResponse(ctx.Writer); err != nil {
+	} else if validResponse, ok := response.(UpdatePostResponseObject); ok {
+		if err := validResponse.VisitUpdatePostResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {
@@ -697,17 +697,17 @@ func (sh *strictHandler) PutApiV1AdminPostsPostSlug(ctx *gin.Context, postSlug s
 	}
 }
 
-// PostApiV1AdminPostsPostSlugPublish operation middleware
-func (sh *strictHandler) PostApiV1AdminPostsPostSlugPublish(ctx *gin.Context, postSlug string) {
-	var request PostApiV1AdminPostsPostSlugPublishRequestObject
+// PublishPost operation middleware
+func (sh *strictHandler) PublishPost(ctx *gin.Context, slug string) {
+	var request PublishPostRequestObject
 
-	request.PostSlug = postSlug
+	request.Slug = slug
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PostApiV1AdminPostsPostSlugPublish(ctx, request.(PostApiV1AdminPostsPostSlugPublishRequestObject))
+		return sh.ssi.PublishPost(ctx, request.(PublishPostRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostApiV1AdminPostsPostSlugPublish")
+		handler = middleware(handler, "PublishPost")
 	}
 
 	response, err := handler(ctx, request)
@@ -715,8 +715,8 @@ func (sh *strictHandler) PostApiV1AdminPostsPostSlugPublish(ctx *gin.Context, po
 	if err != nil {
 		ctx.Error(err)
 		ctx.Status(http.StatusInternalServerError)
-	} else if validResponse, ok := response.(PostApiV1AdminPostsPostSlugPublishResponseObject); ok {
-		if err := validResponse.VisitPostApiV1AdminPostsPostSlugPublishResponse(ctx.Writer); err != nil {
+	} else if validResponse, ok := response.(PublishPostResponseObject); ok {
+		if err := validResponse.VisitPublishPostResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {
@@ -724,15 +724,15 @@ func (sh *strictHandler) PostApiV1AdminPostsPostSlugPublish(ctx *gin.Context, po
 	}
 }
 
-// GetApiV1Posts operation middleware
-func (sh *strictHandler) GetApiV1Posts(ctx *gin.Context) {
-	var request GetApiV1PostsRequestObject
+// GetPublishedPosts operation middleware
+func (sh *strictHandler) GetPublishedPosts(ctx *gin.Context) {
+	var request GetPublishedPostsRequestObject
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetApiV1Posts(ctx, request.(GetApiV1PostsRequestObject))
+		return sh.ssi.GetPublishedPosts(ctx, request.(GetPublishedPostsRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetApiV1Posts")
+		handler = middleware(handler, "GetPublishedPosts")
 	}
 
 	response, err := handler(ctx, request)
@@ -740,8 +740,8 @@ func (sh *strictHandler) GetApiV1Posts(ctx *gin.Context) {
 	if err != nil {
 		ctx.Error(err)
 		ctx.Status(http.StatusInternalServerError)
-	} else if validResponse, ok := response.(GetApiV1PostsResponseObject); ok {
-		if err := validResponse.VisitGetApiV1PostsResponse(ctx.Writer); err != nil {
+	} else if validResponse, ok := response.(GetPublishedPostsResponseObject); ok {
+		if err := validResponse.VisitGetPublishedPostsResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {
@@ -749,17 +749,17 @@ func (sh *strictHandler) GetApiV1Posts(ctx *gin.Context) {
 	}
 }
 
-// GetApiV1PostsPostSlug operation middleware
-func (sh *strictHandler) GetApiV1PostsPostSlug(ctx *gin.Context, postSlug string) {
-	var request GetApiV1PostsPostSlugRequestObject
+// GetPublishedPost operation middleware
+func (sh *strictHandler) GetPublishedPost(ctx *gin.Context, slug string) {
+	var request GetPublishedPostRequestObject
 
-	request.PostSlug = postSlug
+	request.Slug = slug
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetApiV1PostsPostSlug(ctx, request.(GetApiV1PostsPostSlugRequestObject))
+		return sh.ssi.GetPublishedPost(ctx, request.(GetPublishedPostRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetApiV1PostsPostSlug")
+		handler = middleware(handler, "GetPublishedPost")
 	}
 
 	response, err := handler(ctx, request)
@@ -767,8 +767,8 @@ func (sh *strictHandler) GetApiV1PostsPostSlug(ctx *gin.Context, postSlug string
 	if err != nil {
 		ctx.Error(err)
 		ctx.Status(http.StatusInternalServerError)
-	} else if validResponse, ok := response.(GetApiV1PostsPostSlugResponseObject); ok {
-		if err := validResponse.VisitGetApiV1PostsPostSlugResponse(ctx.Writer); err != nil {
+	} else if validResponse, ok := response.(GetPublishedPostResponseObject); ok {
+		if err := validResponse.VisitGetPublishedPostResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {

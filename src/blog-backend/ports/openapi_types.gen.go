@@ -42,8 +42,8 @@ type UpdatePostRequest struct {
 	Title *string `json:"title,omitempty"`
 }
 
-// PostApiV1AdminPostsJSONRequestBody defines body for PostApiV1AdminPosts for application/json ContentType.
-type PostApiV1AdminPostsJSONRequestBody = NewPostRequest
+// CreatePostJSONRequestBody defines body for CreatePost for application/json ContentType.
+type CreatePostJSONRequestBody = NewPostRequest
 
-// PutApiV1AdminPostsPostSlugJSONRequestBody defines body for PutApiV1AdminPostsPostSlug for application/json ContentType.
-type PutApiV1AdminPostsPostSlugJSONRequestBody = UpdatePostRequest
+// UpdatePostJSONRequestBody defines body for UpdatePost for application/json ContentType.
+type UpdatePostJSONRequestBody = UpdatePostRequest

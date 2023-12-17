@@ -17,7 +17,7 @@
 			<div class="mt-2">
 				<a href={`/blog/${post.slug}`}>
 					<h2 class="text-base font-bold tracking-normal text-ellipsis text-zinc-900 line-clamp-2">
-						{post.title}
+						{post.draft?.title || post.title}
 					</h2>
 				</a>
 			</div>

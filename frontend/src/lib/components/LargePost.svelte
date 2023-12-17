@@ -23,7 +23,7 @@
 
 		<!-- POST TITLE -->
 		<a href={`/blog/${post.slug}`}>
-			<h2 class="text-2xl mt-2 leading-6 line-clamp-2">{post.title}</h2>
+			<h2 class="text-2xl mt-2 leading-6 line-clamp-2">{post.draft?.title || post.title}</h2>
 		</a>
 
 		<PostMetadata post={post} />

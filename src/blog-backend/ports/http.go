@@ -21,74 +21,74 @@ func NewHttpServer(application app.Application) HttpServer {
 	}
 }
 
-func (p HttpServer) GetApiV1AdminPosts(ctx context.Context, request GetApiV1AdminPostsRequestObject) (GetApiV1AdminPostsResponseObject, error) {
+func (p HttpServer) GetAllPosts(ctx context.Context, request GetAllPostsRequestObject) (GetAllPostsResponseObject, error) {
 	resp, err := p.app.Queries.GetAllPosts.Handle(ctx)
 
 	posts := domainPostsToHttpAdminPosts(resp)
 
-	return GetApiV1AdminPosts200JSONResponse(posts), err
+	return GetAllPosts200JSONResponse(posts), err
 }
 
-func (p HttpServer) PostApiV1AdminPosts(ctx context.Context, request PostApiV1AdminPostsRequestObject) (PostApiV1AdminPostsResponseObject, error) {
-	return PostApiV1AdminPosts201Response{}, p.app.Commands.CreatePostDraft.Handle(ctx, command.CreatePostDraft{
+func (p HttpServer) CreatePost(ctx context.Context, request CreatePostRequestObject) (CreatePostResponseObject, error) {
+	return CreatePost201Response{}, p.app.Commands.CreatePostDraft.Handle(ctx, command.CreatePostDraft{
 		Title: request.Body.Title,
 		Body:  request.Body.Body,
 	})
 }
 
-func (p HttpServer) DeleteApiV1AdminPostsPostSlug(ctx context.Context, request DeleteApiV1AdminPostsPostSlugRequestObject) (DeleteApiV1AdminPostsPostSlugResponseObject, error) {
+func (p HttpServer) DeletePost(ctx context.Context, request DeletePostRequestObject) (DeletePostResponseObject, error) {
 	// TODO: Implement
 	return nil, nil
 }
 
-func (p HttpServer) GetApiV1AdminPostsPostSlug(ctx context.Context, request GetApiV1AdminPostsPostSlugRequestObject) (GetApiV1AdminPostsPostSlugResponseObject, error) {
+func (p HttpServer) GetAnyPost(ctx context.Context, request GetAnyPostRequestObject) (GetAnyPostResponseObject, error) {
 	resp, err := p.app.Queries.GetAnyPost.Handle(ctx, query.GetAnyPost{
-		PostSlug: request.PostSlug,
+		Slug: request.Slug,
 	})
 
 	if resp == nil {
-		return GetApiV1AdminPostsPostSlug404Response{}, err
+		return GetAnyPost404Response{}, err
 	}
 
 	post := domainPostToHttpAdminPost(resp)
 
-	return GetApiV1AdminPostsPostSlug200JSONResponse(post), err
+	return GetAnyPost200JSONResponse(post), err
 }
 
-func (p HttpServer) PutApiV1AdminPostsPostSlug(ctx context.Context, request PutApiV1AdminPostsPostSlugRequestObject) (PutApiV1AdminPostsPostSlugResponseObject, error) {
-	return PutApiV1AdminPostsPostSlug200Response{}, p.app.Commands.UpdatePostDraft.Handle(ctx, command.UpdatePostDraft{
-		Slug:  request.PostSlug,
+func (p HttpServer) UpdatePost(ctx context.Context, request UpdatePostRequestObject) (UpdatePostResponseObject, error) {
+	return UpdatePost200Response{}, p.app.Commands.UpdatePostDraft.Handle(ctx, command.UpdatePostDraft{
+		Slug:  request.Slug,
 		Title: request.Body.Title,
 		Body:  request.Body.Body,
 	})
 }
 
-func (p HttpServer) PostApiV1AdminPostsPostSlugPublish(ctx context.Context, request PostApiV1AdminPostsPostSlugPublishRequestObject) (PostApiV1AdminPostsPostSlugPublishResponseObject, error) {
-	return PostApiV1AdminPostsPostSlugPublish201Response{}, p.app.Commands.PublishPostDraft.Handle(ctx, command.PublishPostDraft{
-		Slug: request.PostSlug,
+func (p HttpServer) PublishPost(ctx context.Context, request PublishPostRequestObject) (PublishPostResponseObject, error) {
+	return PublishPost201Response{}, p.app.Commands.PublishPostDraft.Handle(ctx, command.PublishPostDraft{
+		Slug: request.Slug,
 	})
 }
 
-func (p HttpServer) GetApiV1Posts(ctx context.Context, request GetApiV1PostsRequestObject) (GetApiV1PostsResponseObject, error) {
+func (p HttpServer) GetPublishedPosts(ctx context.Context, request GetPublishedPostsRequestObject) (GetPublishedPostsResponseObject, error) {
 	resp, err := p.app.Queries.GetPublishedPosts.Handle(ctx)
 
 	posts := domainPostsToHttpPosts(resp)
 
-	return GetApiV1Posts200JSONResponse(posts), err
+	return GetPublishedPosts200JSONResponse(posts), err
 }
 
-func (p HttpServer) GetApiV1PostsPostSlug(ctx context.Context, request GetApiV1PostsPostSlugRequestObject) (GetApiV1PostsPostSlugResponseObject, error) {
+func (p HttpServer) GetPublishedPost(ctx context.Context, request GetPublishedPostRequestObject) (GetPublishedPostResponseObject, error) {
 	resp, err := p.app.Queries.GetPublishedPost.Handle(ctx, query.GetPublishedPost{
-		PostSlug: request.PostSlug,
+		PostSlug: request.Slug,
 	})
 
 	if resp == nil {
-		return GetApiV1PostsPostSlug404Response{}, err
+		return GetPublishedPost404Response{}, err
 	}
 
 	post := domainPostToHttpPost(resp)
 
-	return GetApiV1PostsPostSlug200JSONResponse(post), err
+	return GetPublishedPost200JSONResponse(post), err
 }
 
 func domainPostToHttpPost(post *post.Post) Post {
