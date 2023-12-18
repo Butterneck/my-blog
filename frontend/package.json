@@ -47,6 +47,12 @@
 		"bytemd": "^1.21.0",
 		"fecha": "^4.2.3",
 		"highlight.js": "^11.9.0",
-		"svelte-meta-tags": "^3.1.0"
+		"rehype-pretty-code": "^0.12.1",
+		"rehype-stringify": "^10.0.0",
+		"remark-parse": "^11.0.0",
+		"remark-rehype": "^11.0.0",
+		"shikiji": "^0.8.7",
+		"svelte-meta-tags": "^3.1.0",
+		"unified": "^11.0.4"
 	}
 }

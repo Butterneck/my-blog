@@ -1,8 +1,7 @@
 <script lang="ts">
 	export let data: {
-		body: {
-			post: Post;
-		};
+		post: Post;
+		renderedBody?: string;
 	};
 	import { MetaTags } from 'svelte-meta-tags';
 	import { blogMetaData } from '$lib/blogMetaData';
@@ -10,7 +9,7 @@
 	import { getCurrentUser } from '$lib/auth';
 	import { publishPost } from '$lib/api';
 
-	const post = data.body.post;
+	const post = data.post;
 
 	const meta = {
 		title: `${post.title} | ${blogMetaData.blogTitle}`,
@@ -112,7 +111,8 @@
 		<div
 			class="mb-20 mt-6 heading-font text-xl whitespace-pre-line main-black post-content sm:text-lg"
 		>
-			{post.draft?.body || post.body}
+			<!-- {post.draft?.body || post.body} -->
+			{@html data.renderedBody}
 		</div>
 
 		<!-- POST FOOTER -->
