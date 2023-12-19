@@ -172,6 +172,7 @@ func (r *DDBPostRepository) GetPublishedPosts(ctx context.Context) ([]*post.Post
 				":emptyString":  &types.AttributeValueMemberS{Value: ""},
 				":zero":         &types.AttributeValueMemberN{Value: "0"},
 			},
+			ScanIndexForward: aws.Bool(false),
 		})
 		if err != nil {
 			return nil, fmt.Errorf("GetAllPosts - db.Scan - error: %v", err)
@@ -213,6 +214,7 @@ func (r *DDBPostRepository) GetAllPosts(ctx context.Context) ([]*post.Post, erro
 			ExpressionAttributeValues: map[string]types.AttributeValue{
 				":creationYear": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", year)},
 			},
+			ScanIndexForward: aws.Bool(false),
 		})
 		if err != nil {
 			return nil, fmt.Errorf("GetAllPosts - db.Scan - error: %v", err)
