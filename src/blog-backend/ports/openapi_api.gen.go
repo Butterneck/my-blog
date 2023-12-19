@@ -18,7 +18,7 @@ import (
 type ServerInterface interface {
 	// Retrieve a list of posts
 	// (GET /api/v1/admin/posts)
-	GetAllPosts(c *gin.Context)
+	GetAllPosts(c *gin.Context, params GetAllPostsParams)
 	// Create a new post
 	// (POST /api/v1/admin/posts)
 	CreatePost(c *gin.Context)
@@ -36,7 +36,7 @@ type ServerInterface interface {
 	PublishPost(c *gin.Context, slug string)
 	// Retrieve a list of published posts
 	// (GET /api/v1/posts)
-	GetPublishedPosts(c *gin.Context)
+	GetPublishedPosts(c *gin.Context, params GetPublishedPostsParams)
 	// Retrieve a published post
 	// (GET /api/v1/posts/{slug})
 	GetPublishedPost(c *gin.Context, slug string)
@@ -54,7 +54,28 @@ type MiddlewareFunc func(c *gin.Context)
 // GetAllPosts operation middleware
 func (siw *ServerInterfaceWrapper) GetAllPosts(c *gin.Context) {
 
+	var err error
+
 	c.Set(Admin_authorizerScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetAllPostsParams
+
+	// ------------- Optional query parameter "pageSize" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "pageSize", c.Request.URL.Query(), &params.PageSize)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter pageSize: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	// ------------- Optional query parameter "nextPageToken" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "nextPageToken", c.Request.URL.Query(), &params.NextPageToken)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter nextPageToken: %w", err), http.StatusBadRequest)
+		return
+	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
@@ -63,7 +84,7 @@ func (siw *ServerInterfaceWrapper) GetAllPosts(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.GetAllPosts(c)
+	siw.Handler.GetAllPosts(c, params)
 }
 
 // CreatePost operation middleware
@@ -188,6 +209,27 @@ func (siw *ServerInterfaceWrapper) PublishPost(c *gin.Context) {
 // GetPublishedPosts operation middleware
 func (siw *ServerInterfaceWrapper) GetPublishedPosts(c *gin.Context) {
 
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetPublishedPostsParams
+
+	// ------------- Optional query parameter "pageSize" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "pageSize", c.Request.URL.Query(), &params.PageSize)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter pageSize: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	// ------------- Optional query parameter "nextPageToken" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "nextPageToken", c.Request.URL.Query(), &params.NextPageToken)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter nextPageToken: %w", err), http.StatusBadRequest)
+		return
+	}
+
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
 		if c.IsAborted() {
@@ -195,7 +237,7 @@ func (siw *ServerInterfaceWrapper) GetPublishedPosts(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.GetPublishedPosts(c)
+	siw.Handler.GetPublishedPosts(c, params)
 }
 
 // GetPublishedPost operation middleware
@@ -260,13 +302,20 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 }
 
 type GetAllPostsRequestObject struct {
+	Params GetAllPostsParams
 }
 
 type GetAllPostsResponseObject interface {
 	VisitGetAllPostsResponse(w http.ResponseWriter) error
 }
 
-type GetAllPosts200JSONResponse []AdminPost
+type GetAllPosts200JSONResponse struct {
+	// NextPageToken The next page token to use for pagination
+	NextPageToken *string `json:"nextPageToken,omitempty"`
+
+	// Posts The list of posts
+	Posts *[]AdminPost `json:"posts,omitempty"`
+}
 
 func (response GetAllPosts200JSONResponse) VisitGetAllPostsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -454,13 +503,20 @@ func (response PublishPost500Response) VisitPublishPostResponse(w http.ResponseW
 }
 
 type GetPublishedPostsRequestObject struct {
+	Params GetPublishedPostsParams
 }
 
 type GetPublishedPostsResponseObject interface {
 	VisitGetPublishedPostsResponse(w http.ResponseWriter) error
 }
 
-type GetPublishedPosts200JSONResponse []Post
+type GetPublishedPosts200JSONResponse struct {
+	// NextPageToken The next page token to use for pagination
+	NextPageToken *string `json:"nextPageToken,omitempty"`
+
+	// Posts The list of posts
+	Posts *[]Post `json:"posts,omitempty"`
+}
 
 func (response GetPublishedPosts200JSONResponse) VisitGetPublishedPostsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -551,8 +607,10 @@ type strictHandler struct {
 }
 
 // GetAllPosts operation middleware
-func (sh *strictHandler) GetAllPosts(ctx *gin.Context) {
+func (sh *strictHandler) GetAllPosts(ctx *gin.Context, params GetAllPostsParams) {
 	var request GetAllPostsRequestObject
+
+	request.Params = params
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.GetAllPosts(ctx, request.(GetAllPostsRequestObject))
@@ -725,8 +783,10 @@ func (sh *strictHandler) PublishPost(ctx *gin.Context, slug string) {
 }
 
 // GetPublishedPosts operation middleware
-func (sh *strictHandler) GetPublishedPosts(ctx *gin.Context) {
+func (sh *strictHandler) GetPublishedPosts(ctx *gin.Context, params GetPublishedPostsParams) {
 	var request GetPublishedPostsRequestObject
+
+	request.Params = params
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.GetPublishedPosts(ctx, request.(GetPublishedPostsRequestObject))

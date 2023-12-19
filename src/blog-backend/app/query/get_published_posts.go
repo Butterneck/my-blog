@@ -18,6 +18,6 @@ func NewGetPublishedPostsHandler(postRepository post.Repository) GetPublishedPos
 	return GetPublishedPostsHandler{postRepository: postRepository}
 }
 
-func (q GetPublishedPostsHandler) Handle(ctx context.Context) ([]*post.Post, error) {
-	return q.postRepository.GetPublishedPosts(ctx)
+func (q GetPublishedPostsHandler) Handle(ctx context.Context, pageSize *int, nextPageToken *string) (*post.PaginatedPosts, error) {
+	return q.postRepository.GetPublishedPosts(ctx, pageSize, nextPageToken)
 }

@@ -2,8 +2,9 @@ package adapters
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -15,6 +16,7 @@ import (
 
 // FirstYear is the first year that posts were published.
 const FirstYear = 2023
+const FeedName = "butterneck-blog"
 
 type DDBPost struct {
 	Id           string `dynamodbav:"id"`
@@ -22,7 +24,7 @@ type DDBPost struct {
 	Body         string `dynamodbav:"body"`
 	Slug         string `dynamodbav:"slug"`
 	CreationDate int64  `dynamodbav:"creationDate"`
-	CreationYear int64  `dynamodbav:"creationYear"`
+	FeedName     string `dynamodbav:"feedName"`
 	DraftTitle   string `dynamodbav:"draftTitle"`
 	DraftBody    string `dynamodbav:"draftBody"`
 	DraftSlug    string `dynamodbav:"draftSlug"`
@@ -61,6 +63,10 @@ type DDBPostRepositoryConfig struct {
 	TableName          string
 	PostsListIndexName string
 	SlugIndexName      string
+}
+
+type DecodedNextPageToken struct {
+	CreationDate int64 `dynamodbav:"creationDate"`
 }
 
 func NewDDBPostRepository(db *dynamodb.Client, config DDBPostRepositoryConfig) *DDBPostRepository {
@@ -152,81 +158,116 @@ func (r *DDBPostRepository) GetPublishedPost(ctx context.Context, slug string) (
 	return post.ToPost()
 }
 
-func (r *DDBPostRepository) GetPublishedPosts(ctx context.Context) ([]*post.Post, error) {
+func (r *DDBPostRepository) GetPublishedPosts(ctx context.Context, pageSize *int, encodedNextPageToken *string) (*post.PaginatedPosts, error) {
+
+	var nextPageToken string
+
+	decodedNextPageToken, err := decodeNextPageToken(encodedNextPageToken)
+	if err != nil {
+		return nil, fmt.Errorf("GetPublishedPosts - DecodeNextPageToken - error: %v", err)
+	}
+
+	var exclusiveStartKey map[string]types.AttributeValue
+	if decodedNextPageToken != nil {
+		exclusiveStartKey = map[string]types.AttributeValue{
+			"feedName":     &types.AttributeValueMemberS{Value: FeedName},
+			"creationDate": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", decodedNextPageToken.CreationDate)},
+		}
+	}
+
+	resp, err := r.db.Query(ctx, &dynamodb.QueryInput{
+		TableName:              aws.String(r.tableName),
+		IndexName:              aws.String(r.postsListIndexName),
+		KeyConditionExpression: aws.String("feedName = :feedName AND creationDate > :zero"),
+		FilterExpression:       aws.String("#title <> :emptyString AND #body <> :emptyString"),
+		ExpressionAttributeNames: map[string]string{
+			"#title": "title",
+			"#body":  "body",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":feedName":    &types.AttributeValueMemberS{Value: FeedName},
+			":emptyString": &types.AttributeValueMemberS{Value: ""},
+			":zero":        &types.AttributeValueMemberN{Value: "0"},
+		},
+		ScanIndexForward:  aws.Bool(false),
+		Limit:             aws.Int32(int32(getPageSize(pageSize))),
+		ExclusiveStartKey: exclusiveStartKey,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("GetPublishedPosts - db.Scan - error: %v", err)
+	}
 
 	var ddbPosts []*DDBPost
-
-	// Repeat for each year since FirstYear
-	for year := time.Now().Year(); FirstYear <= year; year-- {
-		resp, err := r.db.Query(ctx, &dynamodb.QueryInput{
-			TableName:              aws.String(r.tableName),
-			IndexName:              aws.String(r.postsListIndexName),
-			KeyConditionExpression: aws.String("creationYear = :creationYear AND creationDate > :zero"),
-			FilterExpression:       aws.String("#title <> :emptyString AND #body <> :emptyString"),
-			ExpressionAttributeNames: map[string]string{
-				"#title": "title",
-				"#body":  "body",
-			},
-			ExpressionAttributeValues: map[string]types.AttributeValue{
-				":creationYear": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", year)},
-				":emptyString":  &types.AttributeValueMemberS{Value: ""},
-				":zero":         &types.AttributeValueMemberN{Value: "0"},
-			},
-			ScanIndexForward: aws.Bool(false),
-		})
-		if err != nil {
-			return nil, fmt.Errorf("GetAllPosts - db.Scan - error: %v", err)
-		}
-
-		ddbPostsForYear := []*DDBPost{}
-		err = attributevalue.UnmarshalListOfMaps(resp.Items, &ddbPostsForYear)
-		if err != nil {
-			return nil, fmt.Errorf("GetAllPosts - attributevalue.UnmarshalListOfMaps - error: %v", err)
-		}
-
-		ddbPosts = append(ddbPosts, ddbPostsForYear...)
+	err = attributevalue.UnmarshalListOfMaps(resp.Items, &ddbPosts)
+	if err != nil {
+		return nil, fmt.Errorf("GetPublishedPosts - attributevalue.UnmarshalListOfMaps - error: %v", err)
 	}
 
 	var posts []*post.Post
 	for _, ddbPost := range ddbPosts {
 		post, err := ddbPost.ToPost()
 		if err != nil {
-			return nil, fmt.Errorf("GetAllPosts - ddbPost.ToPost - error: %v", err)
+			return nil, fmt.Errorf("GetPublishedPosts - ddbPost.ToPost - error: %v", err)
 		}
 
 		posts = append(posts, post)
 	}
 
-	return posts, nil
+	if len(resp.LastEvaluatedKey) > 0 {
+		var decodedNextPageToken DecodedNextPageToken
+		err := attributevalue.UnmarshalMap(resp.LastEvaluatedKey, &decodedNextPageToken)
+		if err != nil {
+			return nil, fmt.Errorf("GetPublishedPosts - attributevalue.UnmarshalMap - error: %v", err)
+		}
+
+		nextPageToken, err = encodeNextPageToken(&decodedNextPageToken)
+		if err != nil {
+			return nil, fmt.Errorf("GetPublishedPosts - EncodeNextPageToken - error: %v", err)
+		}
+	}
+
+	return &post.PaginatedPosts{
+		Posts:         posts,
+		NextPageToken: nextPageToken,
+	}, nil
 }
 
-func (r *DDBPostRepository) GetAllPosts(ctx context.Context) ([]*post.Post, error) {
+func (r *DDBPostRepository) GetAllPosts(ctx context.Context, pageSize *int, encodedNextPageToken *string) (*post.PaginatedPosts, error) {
 
-	var ddbPosts []*DDBPost
+	var nextPageToken string
 
-	// Repeat for each year since FirstYear
-	for year := time.Now().Year(); FirstYear <= year; year-- {
+	decodedNextPageToken, err := decodeNextPageToken(encodedNextPageToken)
+	if err != nil {
+		return nil, fmt.Errorf("GetAllPosts - DecodeNextPageToken - error: %v", err)
+	}
 
-		resp, err := r.db.Query(ctx, &dynamodb.QueryInput{
-			TableName:              aws.String(r.tableName),
-			IndexName:              aws.String(r.postsListIndexName),
-			KeyConditionExpression: aws.String("creationYear = :creationYear"),
-			ExpressionAttributeValues: map[string]types.AttributeValue{
-				":creationYear": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", year)},
-			},
-			ScanIndexForward: aws.Bool(false),
-		})
-		if err != nil {
-			return nil, fmt.Errorf("GetAllPosts - db.Scan - error: %v", err)
+	var exclusiveStartKey map[string]types.AttributeValue
+	if decodedNextPageToken != nil {
+		exclusiveStartKey = map[string]types.AttributeValue{
+			"feedName":     &types.AttributeValueMemberS{Value: FeedName},
+			"creationDate": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", decodedNextPageToken.CreationDate)},
 		}
+	}
 
-		ddbPostsForYear := []*DDBPost{}
-		err = attributevalue.UnmarshalListOfMaps(resp.Items, &ddbPostsForYear)
-		if err != nil {
-			return nil, fmt.Errorf("GetAllPosts - attributevalue.UnmarshalListOfMaps - error: %v", err)
-		}
+	resp, err := r.db.Query(ctx, &dynamodb.QueryInput{
+		TableName:              aws.String(r.tableName),
+		IndexName:              aws.String(r.postsListIndexName),
+		KeyConditionExpression: aws.String("feedName = :feedName"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":feedName": &types.AttributeValueMemberS{Value: FeedName},
+		},
+		ScanIndexForward:  aws.Bool(false),
+		Limit:             aws.Int32(int32(getPageSize(pageSize))),
+		ExclusiveStartKey: exclusiveStartKey,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("GetAllPosts - db.Scan - error: %v", err)
+	}
 
-		ddbPosts = append(ddbPosts, ddbPostsForYear...)
+	ddbPosts := []*DDBPost{}
+	err = attributevalue.UnmarshalListOfMaps(resp.Items, &ddbPosts)
+	if err != nil {
+		return nil, fmt.Errorf("GetAllPosts - attributevalue.UnmarshalListOfMaps - error: %v", err)
 	}
 
 	var posts []*post.Post
@@ -239,7 +280,23 @@ func (r *DDBPostRepository) GetAllPosts(ctx context.Context) ([]*post.Post, erro
 		posts = append(posts, post)
 	}
 
-	return posts, nil
+	if len(resp.LastEvaluatedKey) > 0 {
+		var decodedNextPageToken DecodedNextPageToken
+		err := attributevalue.UnmarshalMap(resp.LastEvaluatedKey, &decodedNextPageToken)
+		if err != nil {
+			return nil, fmt.Errorf("GetAllPosts - attributevalue.UnmarshalMap - error: %v", err)
+		}
+
+		nextPageToken, err = encodeNextPageToken(&decodedNextPageToken)
+		if err != nil {
+			return nil, fmt.Errorf("GetAllPosts - EncodeNextPageToken - error: %v", err)
+		}
+	}
+
+	return &post.PaginatedPosts{
+		Posts:         posts,
+		NextPageToken: nextPageToken,
+	}, nil
 }
 
 func (r *DDBPostRepository) UpdatePost(ctx context.Context, slug string, updateFn func(h *post.Post) (*post.Post, error)) error {
@@ -268,7 +325,7 @@ func (r *DDBPostRepository) UpdatePost(ctx context.Context, slug string, updateF
 		"draftTitle":   &types.AttributeValueMemberS{Value: updatedPost.Draft().Title()},
 		"draftBody":    &types.AttributeValueMemberS{Value: updatedPost.Draft().Body()},
 		"draftSlug":    &types.AttributeValueMemberS{Value: updatedPost.Draft().Slug()},
-		"creationYear": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", currentDDBPost.CreationYear)},
+		"feedName":     &types.AttributeValueMemberS{Value: fmt.Sprintf("%d", FeedName)},
 	}
 
 	_, err = r.db.PutItem(ctx, &dynamodb.PutItemInput{
@@ -299,7 +356,7 @@ func (r *DDBPostRepository) CreatePost(ctx context.Context, p *post.Post) error 
 			"draftTitle":   &types.AttributeValueMemberS{Value: p.Draft().Title()},
 			"draftBody":    &types.AttributeValueMemberS{Value: p.Draft().Body()},
 			"draftSlug":    &types.AttributeValueMemberS{Value: p.Draft().Slug()},
-			"creationYear": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", time.Now().Year())},
+			"feedName":     &types.AttributeValueMemberS{Value: FeedName},
 		},
 		ConditionExpression: aws.String("attribute_not_exists(id)"),
 	})
@@ -312,4 +369,40 @@ func (r *DDBPostRepository) CreatePost(ctx context.Context, p *post.Post) error 
 
 func newPostId() (string, error) {
 	return uuid.New().String(), nil
+}
+
+func decodeNextPageToken(encodedNextPageToken *string) (*DecodedNextPageToken, error) {
+	if encodedNextPageToken == nil {
+		return nil, nil
+	}
+
+	decoded, err := base64.StdEncoding.DecodeString(*encodedNextPageToken)
+	if err != nil {
+		return nil, err
+	}
+
+	var decodedNextPageToken DecodedNextPageToken
+	err = json.Unmarshal(decoded, &decodedNextPageToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return &decodedNextPageToken, nil
+}
+
+func encodeNextPageToken(nextPageToken *DecodedNextPageToken) (string, error) {
+	encoded, err := json.Marshal(nextPageToken)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString([]byte(encoded)), nil
+}
+
+func getPageSize(pageSize *int) int {
+	if pageSize == nil {
+		return 10
+	}
+
+	return *pageSize
 }

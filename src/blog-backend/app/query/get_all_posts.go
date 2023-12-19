@@ -18,6 +18,6 @@ func NewGetAllPostsHandler(postRepository post.Repository) GetAllPostsHandler {
 	return GetAllPostsHandler{postRepository: postRepository}
 }
 
-func (q GetAllPostsHandler) Handle(ctx context.Context) ([]*post.Post, error) {
-	return q.postRepository.GetAllPosts(ctx)
+func (q GetAllPostsHandler) Handle(ctx context.Context, pageSize *int, nextPageToken *string) (*post.PaginatedPosts, error) {
+	return q.postRepository.GetAllPosts(ctx, pageSize, nextPageToken)
 }

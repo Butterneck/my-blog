@@ -4,11 +4,16 @@ import (
 	"context"
 )
 
+type PaginatedPosts struct {
+	Posts         []*Post
+	NextPageToken string
+}
+
 type Repository interface {
 	GetAnyPost(ctx context.Context, id string) (*Post, error)
 	GetPublishedPost(ctx context.Context, id string) (*Post, error)
-	GetAllPosts(ctx context.Context) ([]*Post, error)
-	GetPublishedPosts(ctx context.Context) ([]*Post, error)
+	GetAllPosts(ctx context.Context, pageSize *int, nextPageToken *string) (*PaginatedPosts, error)
+	GetPublishedPosts(ctx context.Context, pageSize *int, nextPageToken *string) (*PaginatedPosts, error)
 	CreatePost(ctx context.Context, p *Post) error
 	UpdatePost(
 		ctx context.Context,

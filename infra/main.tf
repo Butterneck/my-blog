@@ -95,8 +95,8 @@ module "blog_backend" {
         type = "S"
       },
       {
-        name = "creationYear",
-        type = "N"
+        name = "feedName",
+        type = "S"
       }
     ]
     hash_key  = "id"
@@ -108,7 +108,7 @@ module "blog_backend" {
       },
       {
         name = "list-index",
-        hash_key = "creationYear",
+        hash_key = "feedName",
         range_key = "creationDate",
         projection_type = "ALL"
       }

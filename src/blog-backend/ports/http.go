@@ -2,6 +2,7 @@ package ports
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/butterneck/my-blog/src/blog-backend/app"
 	"github.com/butterneck/my-blog/src/blog-backend/app/command"
@@ -22,11 +23,17 @@ func NewHttpServer(application app.Application) HttpServer {
 }
 
 func (p HttpServer) GetAllPosts(ctx context.Context, request GetAllPostsRequestObject) (GetAllPostsResponseObject, error) {
-	resp, err := p.app.Queries.GetAllPosts.Handle(ctx)
+	fmt.Println("GetAllPosts")
+	fmt.Println(request)
+	fmt.Println(request)
+	resp, err := p.app.Queries.GetAllPosts.Handle(ctx, request.Params.PageSize, request.Params.NextPageToken)
 
-	posts := domainPostsToHttpAdminPosts(resp)
+	posts := domainPostsToHttpAdminPosts(resp.Posts)
 
-	return GetAllPosts200JSONResponse(posts), err
+	return GetAllPosts200JSONResponse{
+		Posts:         &posts,
+		NextPageToken: &resp.NextPageToken,
+	}, err
 }
 
 func (p HttpServer) CreatePost(ctx context.Context, request CreatePostRequestObject) (CreatePostResponseObject, error) {
@@ -70,11 +77,14 @@ func (p HttpServer) PublishPost(ctx context.Context, request PublishPostRequestO
 }
 
 func (p HttpServer) GetPublishedPosts(ctx context.Context, request GetPublishedPostsRequestObject) (GetPublishedPostsResponseObject, error) {
-	resp, err := p.app.Queries.GetPublishedPosts.Handle(ctx)
+	resp, err := p.app.Queries.GetPublishedPosts.Handle(ctx, request.Params.PageSize, request.Params.NextPageToken)
 
-	posts := domainPostsToHttpPosts(resp)
+	posts := domainPostsToHttpPosts(resp.Posts)
 
-	return GetPublishedPosts200JSONResponse(posts), err
+	return GetPublishedPosts200JSONResponse{
+		Posts:         &posts,
+		NextPageToken: &resp.NextPageToken,
+	}, err
 }
 
 func (p HttpServer) GetPublishedPost(ctx context.Context, request GetPublishedPostRequestObject) (GetPublishedPostResponseObject, error) {

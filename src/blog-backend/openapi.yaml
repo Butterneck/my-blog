@@ -10,15 +10,33 @@ paths:
     get:
       operationId: getPublishedPosts
       summary: Retrieve a list of published posts
+      parameters:
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+          description: The numbers of items to return
+        - in: query
+          name: nextPageToken
+          schema:
+            type: string
+          description: The page token to use for pagination
       responses:
         200:
           description: A list of published posts
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Post'
+                type: object
+                properties:
+                  nextPageToken:
+                    type: string
+                    description: The next page token to use for pagination
+                  posts:
+                    type: array
+                    description: The list of posts
+                    items:
+                      $ref: '#/components/schemas/Post'
         500:
           description: Internal Server Error
       x-amazon-apigateway-integration:
@@ -34,15 +52,33 @@ paths:
     get:
       operationId: getAllPosts
       summary: Retrieve a list of posts
+      parameters:
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+          description: The numbers of items to return
+        - in: query
+          name: nextPageToken
+          schema:
+            type: string
+          description: The page token to use for pagination
       responses:
         200:
           description: A list of posts
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AdminPost'
+                type: object
+                properties:
+                  nextPageToken:
+                    type: string
+                    description: The next page token to use for pagination
+                  posts:
+                    type: array
+                    description: The list of posts
+                    items:
+                      $ref: '#/components/schemas/AdminPost'
         500:
           description: Internal Server Error
       security:

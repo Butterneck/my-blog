@@ -42,6 +42,24 @@ type UpdatePostRequest struct {
 	Title *string `json:"title,omitempty"`
 }
 
+// GetAllPostsParams defines parameters for GetAllPosts.
+type GetAllPostsParams struct {
+	// PageSize The numbers of items to return
+	PageSize *int `form:"pageSize,omitempty" json:"pageSize,omitempty"`
+
+	// NextPageToken The page token to use for pagination
+	NextPageToken *string `form:"nextPageToken,omitempty" json:"nextPageToken,omitempty"`
+}
+
+// GetPublishedPostsParams defines parameters for GetPublishedPosts.
+type GetPublishedPostsParams struct {
+	// PageSize The numbers of items to return
+	PageSize *int `form:"pageSize,omitempty" json:"pageSize,omitempty"`
+
+	// NextPageToken The page token to use for pagination
+	NextPageToken *string `form:"nextPageToken,omitempty" json:"nextPageToken,omitempty"`
+}
+
 // CreatePostJSONRequestBody defines body for CreatePost for application/json ContentType.
 type CreatePostJSONRequestBody = NewPostRequest
 
