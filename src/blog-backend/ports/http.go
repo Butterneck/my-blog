@@ -31,7 +31,7 @@ func (p HttpServer) GetAllPosts(ctx context.Context, request GetAllPostsRequestO
 	posts := domainPostsToHttpAdminPosts(resp.Posts)
 
 	return GetAllPosts200JSONResponse{
-		Posts:         &posts,
+		Posts:         posts,
 		NextPageToken: &resp.NextPageToken,
 	}, err
 }
@@ -78,11 +78,14 @@ func (p HttpServer) PublishPost(ctx context.Context, request PublishPostRequestO
 
 func (p HttpServer) GetPublishedPosts(ctx context.Context, request GetPublishedPostsRequestObject) (GetPublishedPostsResponseObject, error) {
 	resp, err := p.app.Queries.GetPublishedPosts.Handle(ctx, request.Params.PageSize, request.Params.NextPageToken)
+	if err != nil {
+		return nil, err
+	}
 
 	posts := domainPostsToHttpPosts(resp.Posts)
 
 	return GetPublishedPosts200JSONResponse{
-		Posts:         &posts,
+		Posts:         posts,
 		NextPageToken: &resp.NextPageToken,
 	}, err
 }

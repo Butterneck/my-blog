@@ -1,13 +1,14 @@
 <script lang="ts">
 	export let data: {
 		posts: Post[];
-		trendingPosts: Post[];
+		// trendingPosts: Post[];
+		nextPageToken: string;
 	};
 	import { envVariables } from '$lib/envVariables';
 	import { blogMetaData } from '$lib/blogMetaData';
 	import { MetaTags } from 'svelte-meta-tags';
 	import LatestPosts from '$lib/components/LatestPosts.svelte';
-	import TrendingPosts from '$lib/components/TrendingPosts.svelte';
+	// import TrendingPosts from '$lib/components/TrendingPosts.svelte';
 	import PostsArchive from '$lib/components/PostsArchive.svelte';
 
 	const meta = {
@@ -53,8 +54,8 @@
 <LatestPosts posts={data.posts.slice(0, 5)} />
 
 <!-- TRENDING POSTS -->
-<TrendingPosts posts={data.trendingPosts} />
+<!-- <TrendingPosts posts={data.trendingPosts} /> -->
 
 <!-- ALL POSTS -->
-<PostsArchive posts={data.posts} />
+<PostsArchive posts={data.posts} nextPageToken={data.nextPageToken} />
 

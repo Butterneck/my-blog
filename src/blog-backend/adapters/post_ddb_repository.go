@@ -66,7 +66,8 @@ type DDBPostRepositoryConfig struct {
 }
 
 type DecodedNextPageToken struct {
-	CreationDate int64 `dynamodbav:"creationDate"`
+	Id           string `dynamodbav:"id"`
+	CreationDate int64  `dynamodbav:"creationDate"`
 }
 
 func NewDDBPostRepository(db *dynamodb.Client, config DDBPostRepositoryConfig) *DDBPostRepository {
@@ -172,8 +173,11 @@ func (r *DDBPostRepository) GetPublishedPosts(ctx context.Context, pageSize *int
 		exclusiveStartKey = map[string]types.AttributeValue{
 			"feedName":     &types.AttributeValueMemberS{Value: FeedName},
 			"creationDate": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", decodedNextPageToken.CreationDate)},
+			"id":           &types.AttributeValueMemberS{Value: decodedNextPageToken.Id},
 		}
 	}
+
+	fmt.Println("exclusiveStartKey", exclusiveStartKey)
 
 	resp, err := r.db.Query(ctx, &dynamodb.QueryInput{
 		TableName:              aws.String(r.tableName),
@@ -194,8 +198,11 @@ func (r *DDBPostRepository) GetPublishedPosts(ctx context.Context, pageSize *int
 		ExclusiveStartKey: exclusiveStartKey,
 	})
 	if err != nil {
+		fmt.Println(err)
 		return nil, fmt.Errorf("GetPublishedPosts - db.Scan - error: %v", err)
 	}
+
+	fmt.Println(resp)
 
 	var ddbPosts []*DDBPost
 	err = attributevalue.UnmarshalListOfMaps(resp.Items, &ddbPosts)
@@ -213,14 +220,15 @@ func (r *DDBPostRepository) GetPublishedPosts(ctx context.Context, pageSize *int
 		posts = append(posts, post)
 	}
 
+	fmt.Println("lastEvaluatedKey", resp.LastEvaluatedKey)
+
 	if len(resp.LastEvaluatedKey) > 0 {
-		var decodedNextPageToken DecodedNextPageToken
 		err := attributevalue.UnmarshalMap(resp.LastEvaluatedKey, &decodedNextPageToken)
 		if err != nil {
 			return nil, fmt.Errorf("GetPublishedPosts - attributevalue.UnmarshalMap - error: %v", err)
 		}
 
-		nextPageToken, err = encodeNextPageToken(&decodedNextPageToken)
+		nextPageToken, err = encodeNextPageToken(decodedNextPageToken)
 		if err != nil {
 			return nil, fmt.Errorf("GetPublishedPosts - EncodeNextPageToken - error: %v", err)
 		}
@@ -246,6 +254,7 @@ func (r *DDBPostRepository) GetAllPosts(ctx context.Context, pageSize *int, enco
 		exclusiveStartKey = map[string]types.AttributeValue{
 			"feedName":     &types.AttributeValueMemberS{Value: FeedName},
 			"creationDate": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", decodedNextPageToken.CreationDate)},
+			"id":           &types.AttributeValueMemberS{Value: decodedNextPageToken.Id},
 		}
 	}
 
@@ -281,13 +290,12 @@ func (r *DDBPostRepository) GetAllPosts(ctx context.Context, pageSize *int, enco
 	}
 
 	if len(resp.LastEvaluatedKey) > 0 {
-		var decodedNextPageToken DecodedNextPageToken
 		err := attributevalue.UnmarshalMap(resp.LastEvaluatedKey, &decodedNextPageToken)
 		if err != nil {
 			return nil, fmt.Errorf("GetAllPosts - attributevalue.UnmarshalMap - error: %v", err)
 		}
 
-		nextPageToken, err = encodeNextPageToken(&decodedNextPageToken)
+		nextPageToken, err = encodeNextPageToken(decodedNextPageToken)
 		if err != nil {
 			return nil, fmt.Errorf("GetAllPosts - EncodeNextPageToken - error: %v", err)
 		}
@@ -325,7 +333,7 @@ func (r *DDBPostRepository) UpdatePost(ctx context.Context, slug string, updateF
 		"draftTitle":   &types.AttributeValueMemberS{Value: updatedPost.Draft().Title()},
 		"draftBody":    &types.AttributeValueMemberS{Value: updatedPost.Draft().Body()},
 		"draftSlug":    &types.AttributeValueMemberS{Value: updatedPost.Draft().Slug()},
-		"feedName":     &types.AttributeValueMemberS{Value: fmt.Sprintf("%d", FeedName)},
+		"feedName":     &types.AttributeValueMemberS{Value: FeedName},
 	}
 
 	_, err = r.db.PutItem(ctx, &dynamodb.PutItemInput{

@@ -1,7 +1,15 @@
 <script lang="ts">
+	import { getPosts } from '$lib/api';
 	import SmallPost from './SmallPost.svelte';
 	import LoadMorePostsBtn from './LoadMorePostsBtn.svelte';
 	export let posts: Post[];
+	export let nextPageToken: string | undefined;
+
+	async function loadMorePosts() {
+		const loadedPosts = await getPosts({nextPageToken});
+		nextPageToken = loadedPosts.nextPageToken;
+		posts = [...posts, ...loadedPosts.posts];
+	}
 </script>
 
 <div class="home-container posts-grid">
@@ -31,7 +39,9 @@
 		{#each posts as post}
 			<SmallPost {post} />
 		{/each}
-		<LoadMorePostsBtn />
+		{#if nextPageToken}
+			<LoadMorePostsBtn onClick={loadMorePosts} />
+		{/if}
 	</div>
 	<div class="grid-right hidden md:block">
 		<div class="sticky top-8 p-8 about-bg flex flex-col mr-8">

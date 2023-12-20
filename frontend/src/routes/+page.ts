@@ -2,9 +2,9 @@ export const ssr = false;
 export const prerender = false;
 import { getPosts } from '$lib/api';
 
-export async function load(): Promise<{ posts: Post[], trendingPosts: Post[] }> {
+export async function load(): Promise<{ posts: Post[], nextPageToken?: string }> {
 
-  const posts = await getPosts();
+  const { nextPageToken, posts } = await getPosts({});
 
-  return { posts: posts, trendingPosts: posts.slice(0, 4) };
+  return { posts: posts, nextPageToken: nextPageToken };
 }

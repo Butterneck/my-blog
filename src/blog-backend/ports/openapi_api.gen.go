@@ -314,7 +314,7 @@ type GetAllPosts200JSONResponse struct {
 	NextPageToken *string `json:"nextPageToken,omitempty"`
 
 	// Posts The list of posts
-	Posts *[]AdminPost `json:"posts,omitempty"`
+	Posts []AdminPost `json:"posts"`
 }
 
 func (response GetAllPosts200JSONResponse) VisitGetAllPostsResponse(w http.ResponseWriter) error {
@@ -515,7 +515,7 @@ type GetPublishedPosts200JSONResponse struct {
 	NextPageToken *string `json:"nextPageToken,omitempty"`
 
 	// Posts The list of posts
-	Posts *[]Post `json:"posts,omitempty"`
+	Posts []Post `json:"posts"`
 }
 
 func (response GetPublishedPosts200JSONResponse) VisitGetPublishedPostsResponse(w http.ResponseWriter) error {

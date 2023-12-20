@@ -15,13 +15,38 @@ export class DefaultService {
 
     /**
      * Retrieve a list of published posts
-     * @returns Post A list of published posts
+     * @returns any A list of published posts
      * @throws ApiError
      */
-    public static getPublishedPosts(): CancelablePromise<Array<Post>> {
+    public static getPublishedPosts({
+        pageSize,
+        nextPageToken,
+    }: {
+        /**
+         * The numbers of items to return
+         */
+        pageSize?: number,
+        /**
+         * The page token to use for pagination
+         */
+        nextPageToken?: string,
+    }): CancelablePromise<{
+        /**
+         * The next page token to use for pagination
+         */
+        nextPageToken?: string;
+        /**
+         * The list of posts
+         */
+        posts: Array<Post>;
+    }> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/posts',
+            query: {
+                'pageSize': pageSize,
+                'nextPageToken': nextPageToken,
+            },
             errors: {
                 500: `Internal Server Error`,
             },
@@ -30,13 +55,38 @@ export class DefaultService {
 
     /**
      * Retrieve a list of posts
-     * @returns AdminPost A list of posts
+     * @returns any A list of posts
      * @throws ApiError
      */
-    public static getAllPosts(): CancelablePromise<Array<AdminPost>> {
+    public static getAllPosts({
+        pageSize,
+        nextPageToken,
+    }: {
+        /**
+         * The numbers of items to return
+         */
+        pageSize?: number,
+        /**
+         * The page token to use for pagination
+         */
+        nextPageToken?: string,
+    }): CancelablePromise<{
+        /**
+         * The next page token to use for pagination
+         */
+        nextPageToken?: string;
+        /**
+         * The list of posts
+         */
+        posts: Array<AdminPost>;
+    }> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/admin/posts',
+            query: {
+                'pageSize': pageSize,
+                'nextPageToken': nextPageToken,
+            },
             errors: {
                 500: `Internal Server Error`,
             },

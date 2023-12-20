@@ -1,12 +1,12 @@
 import { getCurrentUser } from "./auth";
 import { DefaultService } from "./generated/backend-client";
 
-export async function getPosts(): Promise<Post[]> {
+export async function getPosts({pageSize, nextPageToken}: {pageSize?: number, nextPageToken?: string}): Promise<{nextPageToken?: string, posts: Post[]}> {
     if (await getCurrentUser()) {
-        return await DefaultService.getAllPosts();
+        return await DefaultService.getAllPosts({pageSize: pageSize, nextPageToken: nextPageToken});
     }
 
-    return await DefaultService.getPublishedPosts();
+    return await DefaultService.getPublishedPosts({});
 }
 
 export async function getPost(slug: string): Promise<Post> {

@@ -3,7 +3,7 @@ import { getPosts } from '$lib/getPosts'
 
 
 export async function get() {
-  const response = await getPosts()
+  const response = await getPosts({})
   const body = sitemap(response.body.posts)
 
   const headers = {
