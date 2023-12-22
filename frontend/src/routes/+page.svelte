@@ -11,6 +11,9 @@
 	// import TrendingPosts from '$lib/components/TrendingPosts.svelte';
 	import PostsArchive from '$lib/components/PostsArchive.svelte';
 
+	let latestPosts = data.posts.slice(0, 5);
+	let olderPosts = data.posts.slice(5);
+
 	const meta = {
 		title: `Home | ${blogMetaData.blogTitle}`,
 		description: blogMetaData.description,
@@ -51,11 +54,12 @@
 />
 
 <!-- LATEST POSTS -->
-<LatestPosts posts={data.posts.slice(0, 5)} />
+<LatestPosts posts={latestPosts} />
 
 <!-- TRENDING POSTS -->
 <!-- <TrendingPosts posts={data.trendingPosts} /> -->
 
 <!-- ALL POSTS -->
-<PostsArchive posts={data.posts} nextPageToken={data.nextPageToken} />
-
+{#if olderPosts.length > 0}
+	<PostsArchive posts={olderPosts} nextPageToken={data.nextPageToken} />
+{/if}

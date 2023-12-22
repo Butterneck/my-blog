@@ -6,7 +6,7 @@
 </script>
 
 <div class="large-post">
-	<div class="overflow-hidden sm-border-b pb-8 mb-6">
+	<div class="overflow-hidden pb-8 md:mb-6">
 		<!-- POST IMAGE -->
 		<a href="/blog/{post.slug}">
 			<div class="w-full shimmer-bg cursor-pointer">

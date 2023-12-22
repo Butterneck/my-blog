@@ -1,4 +1,4 @@
-<div class="sub-text font-medium main-black mt-3 flex flex-row items-center">
+<div class="sub-text font-medium main-black mt-1 flex flex-row items-center">
 	<div>
 		<img
 			class="rounded-full w-5 h-5"

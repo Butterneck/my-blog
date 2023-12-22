@@ -21,8 +21,6 @@ export async function load({ params }) {
     .use(rehypeStringify)
     .process(body)
 
-    console.log(file.value);
-
   if (post) {
     return {
       post: post, renderedBody: String(file),

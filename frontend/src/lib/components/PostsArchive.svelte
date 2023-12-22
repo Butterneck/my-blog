@@ -13,8 +13,8 @@
 </script>
 
 <div class="home-container posts-grid">
-	<div class="w-full mb-4 grid-left lg:pl-8">
-		<div class="w-full mb-4 flex flex-row items-center">
+	<div class="w-full mb-4 grid-left xl:pl-8">
+		<!-- <div class="w-full mb-4 flex flex-row items-center">
 			<span class="mr-2">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -35,7 +35,7 @@
 			<div>
 				<p class="heading-text text-sm leading-4 uppercase tracking-wide sm:text-xs">All posts</p>
 			</div>
-		</div>
+		</div> -->
 		{#each posts as post}
 			<SmallPost {post} />
 		{/each}
@@ -44,7 +44,7 @@
 		{/if}
 	</div>
 	<div class="grid-right hidden md:block">
-		<div class="sticky top-8 p-8 about-bg flex flex-col mr-8">
+		<div class="sticky top-8 p-8 about-bg flex flex-col xl:mr-8">
 			<div class="w-full flex mb-4 flex-row items-center">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
