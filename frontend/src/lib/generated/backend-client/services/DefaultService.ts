@@ -214,7 +214,7 @@ export class DefaultService {
 
     /**
      * Publish the draft of a post
-     * @returns any Post successfully created
+     * @returns any Post successfully published
      * @throws ApiError
      */
     public static publishPost({
@@ -225,6 +225,29 @@ export class DefaultService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/admin/posts/{slug}/publish',
+            path: {
+                'slug': slug,
+            },
+            errors: {
+                400: `Bad Request`,
+                500: `Internal Server`,
+            },
+        });
+    }
+
+    /**
+     * Unpublish a post overriding its draft
+     * @returns any Post successfully unpublished
+     * @throws ApiError
+     */
+    public static unpublishPost({
+        slug,
+    }: {
+        slug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/admin/posts/{slug}/unpublish',
             path: {
                 'slug': slug,
             },

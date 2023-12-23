@@ -35,6 +35,9 @@ type ServerInterface interface {
 	// Publish the draft of a post
 	// (POST /api/v1/admin/posts/{slug}/publish)
 	PublishPost(c *gin.Context, slug string)
+	// Unpublish a post overriding its draft
+	// (POST /api/v1/admin/posts/{slug}/unpublish)
+	UnpublishPost(c *gin.Context, slug string)
 	// Retrieve a list of published posts
 	// (GET /api/v1/posts)
 	GetPublishedPosts(c *gin.Context, params GetPublishedPostsParams)
@@ -207,6 +210,32 @@ func (siw *ServerInterfaceWrapper) PublishPost(c *gin.Context) {
 	siw.Handler.PublishPost(c, slug)
 }
 
+// UnpublishPost operation middleware
+func (siw *ServerInterfaceWrapper) UnpublishPost(c *gin.Context) {
+
+	var err error
+
+	// ------------- Path parameter "slug" -------------
+	var slug string
+
+	err = runtime.BindStyledParameter("simple", false, "slug", c.Param("slug"), &slug)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter slug: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	c.Set(Admin_authorizerScopes, []string{})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.UnpublishPost(c, slug)
+}
+
 // GetPublishedPosts operation middleware
 func (siw *ServerInterfaceWrapper) GetPublishedPosts(c *gin.Context) {
 
@@ -298,6 +327,7 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.GET(options.BaseURL+"/api/v1/admin/posts/:slug", wrapper.GetAnyPost)
 	router.PUT(options.BaseURL+"/api/v1/admin/posts/:slug", wrapper.UpdatePost)
 	router.POST(options.BaseURL+"/api/v1/admin/posts/:slug/publish", wrapper.PublishPost)
+	router.POST(options.BaseURL+"/api/v1/admin/posts/:slug/unpublish", wrapper.UnpublishPost)
 	router.GET(options.BaseURL+"/api/v1/posts", wrapper.GetPublishedPosts)
 	router.GET(options.BaseURL+"/api/v1/posts/:slug", wrapper.GetPublishedPost)
 }
@@ -503,6 +533,38 @@ func (response PublishPost500Response) VisitPublishPostResponse(w http.ResponseW
 	return nil
 }
 
+type UnpublishPostRequestObject struct {
+	Slug string `json:"slug"`
+}
+
+type UnpublishPostResponseObject interface {
+	VisitUnpublishPostResponse(w http.ResponseWriter) error
+}
+
+type UnpublishPost201Response struct {
+}
+
+func (response UnpublishPost201Response) VisitUnpublishPostResponse(w http.ResponseWriter) error {
+	w.WriteHeader(201)
+	return nil
+}
+
+type UnpublishPost400Response struct {
+}
+
+func (response UnpublishPost400Response) VisitUnpublishPostResponse(w http.ResponseWriter) error {
+	w.WriteHeader(400)
+	return nil
+}
+
+type UnpublishPost500Response struct {
+}
+
+func (response UnpublishPost500Response) VisitUnpublishPostResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
 type GetPublishedPostsRequestObject struct {
 	Params GetPublishedPostsParams
 }
@@ -587,6 +649,9 @@ type StrictServerInterface interface {
 	// Publish the draft of a post
 	// (POST /api/v1/admin/posts/{slug}/publish)
 	PublishPost(ctx context.Context, request PublishPostRequestObject) (PublishPostResponseObject, error)
+	// Unpublish a post overriding its draft
+	// (POST /api/v1/admin/posts/{slug}/unpublish)
+	UnpublishPost(ctx context.Context, request UnpublishPostRequestObject) (UnpublishPostResponseObject, error)
 	// Retrieve a list of published posts
 	// (GET /api/v1/posts)
 	GetPublishedPosts(ctx context.Context, request GetPublishedPostsRequestObject) (GetPublishedPostsResponseObject, error)
@@ -774,6 +839,33 @@ func (sh *strictHandler) PublishPost(ctx *gin.Context, slug string) {
 		ctx.Status(http.StatusInternalServerError)
 	} else if validResponse, ok := response.(PublishPostResponseObject); ok {
 		if err := validResponse.VisitPublishPostResponse(ctx.Writer); err != nil {
+			ctx.Error(err)
+		}
+	} else if response != nil {
+		ctx.Error(fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UnpublishPost operation middleware
+func (sh *strictHandler) UnpublishPost(ctx *gin.Context, slug string) {
+	var request UnpublishPostRequestObject
+
+	request.Slug = slug
+
+	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.UnpublishPost(ctx, request.(UnpublishPostRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UnpublishPost")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		ctx.Error(err)
+		ctx.Status(http.StatusInternalServerError)
+	} else if validResponse, ok := response.(UnpublishPostResponseObject); ok {
+		if err := validResponse.VisitUnpublishPostResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {

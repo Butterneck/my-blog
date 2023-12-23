@@ -31,6 +31,7 @@ type DDBPost struct {
 	DraftBody    string   `dynamodbav:"draftBody"`
 	DraftSlug    string   `dynamodbav:"draftSlug"`
 	DraftAssets  []string `dynamodbav:"draftAssets"`
+	Del          bool     `dynamodbav:"deleted"`
 }
 
 func (p *DDBPost) ToPost() (*post.Post, error) {
@@ -106,8 +107,10 @@ func (r *DDBPostRepository) getAnyPost(ctx context.Context, slug string) (*DDBPo
 		TableName:              aws.String(r.tableName),
 		IndexName:              aws.String(r.slugIndexName),
 		KeyConditionExpression: aws.String("slug = :slug"),
+		FilterExpression:       aws.String("deleted <> :true"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":slug": &types.AttributeValueMemberS{Value: string(slug)},
+			":true": &types.AttributeValueMemberBOOL{Value: true},
 		},
 	})
 
@@ -134,7 +137,7 @@ func (r *DDBPostRepository) GetPublishedPost(ctx context.Context, slug string) (
 		TableName:              aws.String(r.tableName),
 		IndexName:              aws.String(r.slugIndexName),
 		KeyConditionExpression: aws.String("slug = :slug"),
-		FilterExpression:       aws.String("#title <> :emptyString AND #body <> :emptyString AND #creationDate <> :zero"),
+		FilterExpression:       aws.String("#title <> :emptyString AND #body <> :emptyString AND #creationDate <> :zero AND deleted <> :true"),
 		ExpressionAttributeNames: map[string]string{
 			"#title":        "title",
 			"#body":         "body",
@@ -144,6 +147,7 @@ func (r *DDBPostRepository) GetPublishedPost(ctx context.Context, slug string) (
 			":slug":        &types.AttributeValueMemberS{Value: string(slug)},
 			":emptyString": &types.AttributeValueMemberS{Value: ""},
 			":zero":        &types.AttributeValueMemberN{Value: "0"},
+			":true":        &types.AttributeValueMemberBOOL{Value: true},
 		},
 	})
 
@@ -188,7 +192,7 @@ func (r *DDBPostRepository) GetPublishedPosts(ctx context.Context, pageSize *int
 		TableName:              aws.String(r.tableName),
 		IndexName:              aws.String(r.postsListIndexName),
 		KeyConditionExpression: aws.String("feedName = :feedName AND creationDate > :zero"),
-		FilterExpression:       aws.String("#title <> :emptyString AND #body <> :emptyString"),
+		FilterExpression:       aws.String("#title <> :emptyString AND #body <> :emptyString AND deleted <> :true"),
 		ExpressionAttributeNames: map[string]string{
 			"#title": "title",
 			"#body":  "body",
@@ -197,6 +201,7 @@ func (r *DDBPostRepository) GetPublishedPosts(ctx context.Context, pageSize *int
 			":feedName":    &types.AttributeValueMemberS{Value: FeedName},
 			":emptyString": &types.AttributeValueMemberS{Value: ""},
 			":zero":        &types.AttributeValueMemberN{Value: "0"},
+			":true":        &types.AttributeValueMemberBOOL{Value: true},
 		},
 		ScanIndexForward:  aws.Bool(false),
 		Limit:             aws.Int32(int32(getPageSize(pageSize))),
@@ -267,8 +272,10 @@ func (r *DDBPostRepository) GetAllPosts(ctx context.Context, pageSize *int, enco
 		TableName:              aws.String(r.tableName),
 		IndexName:              aws.String(r.postsListIndexName),
 		KeyConditionExpression: aws.String("feedName = :feedName"),
+		FilterExpression:       aws.String("deleted <> :true"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":feedName": &types.AttributeValueMemberS{Value: FeedName},
+			":true":     &types.AttributeValueMemberBOOL{Value: true},
 		},
 		ScanIndexForward:  aws.Bool(false),
 		Limit:             aws.Int32(int32(getPageSize(pageSize))),
@@ -351,12 +358,16 @@ func (r *DDBPostRepository) UpdatePost(ctx context.Context, slug string, updateF
 		item["assets"] = &types.AttributeValueMemberSS{Value: updatedPost.Assets()}
 	}
 
-	_, err = r.db.PutItem(ctx, &dynamodb.PutItemInput{
+	return r.putItem(ctx, slug, item)
+}
+
+func (r *DDBPostRepository) putItem(ctx context.Context, slug string, item map[string]types.AttributeValue) error {
+	_, err := r.db.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String(r.tableName),
 		Item:      item,
 	})
 	if err != nil {
-		return fmt.Errorf("PersistPost - db.PutItem - error: %v", err)
+		return fmt.Errorf("updatePost - db.PutItem - error: %v", err)
 	}
 
 	return nil
@@ -390,16 +401,39 @@ func (r *DDBPostRepository) CreatePost(ctx context.Context, p *post.Post) error 
 		item["assets"] = &types.AttributeValueMemberSS{Value: p.Assets()}
 	}
 
-	_, err = r.db.PutItem(ctx, &dynamodb.PutItemInput{
-		TableName:           aws.String(r.tableName),
-		Item:                item,
-		ConditionExpression: aws.String("attribute_not_exists(id)"),
-	})
+	return r.putItem(ctx, p.Slug(), item)
+}
+
+func (r *DDBPostRepository) DeletePost(ctx context.Context, slug string) error {
+	currentDDBPost, err := r.getAnyPost(ctx, slug)
 	if err != nil {
-		return fmt.Errorf("PersistPost - db.PutItem - error: %v", err)
+		return err
 	}
 
-	return nil
+	item := map[string]types.AttributeValue{
+		"id":           &types.AttributeValueMemberS{Value: currentDDBPost.Id},
+		"title":        &types.AttributeValueMemberS{Value: currentDDBPost.Title},
+		"body":         &types.AttributeValueMemberS{Value: currentDDBPost.Body},
+		"slug":         &types.AttributeValueMemberS{Value: currentDDBPost.Slug},
+		"creationDate": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", currentDDBPost.CreationDate)},
+		"draftTitle":   &types.AttributeValueMemberS{Value: currentDDBPost.DraftTitle},
+		"draftBody":    &types.AttributeValueMemberS{Value: currentDDBPost.DraftBody},
+		"draftSlug":    &types.AttributeValueMemberS{Value: currentDDBPost.DraftSlug},
+		"feedName":     &types.AttributeValueMemberS{Value: FeedName},
+		"deleted":      &types.AttributeValueMemberBOOL{Value: true},
+	}
+
+	// Conditionally add the draft assets to the item (ddb forbids empty sets)
+	if currentDDBPost.DraftAssets != nil && len(currentDDBPost.DraftAssets) > 0 {
+		item["draftAssets"] = &types.AttributeValueMemberSS{Value: currentDDBPost.DraftAssets}
+	}
+
+	// Conditionally add the assets to the item (ddb forbids empty sets)
+	if currentDDBPost.Assets != nil && len(currentDDBPost.Assets) > 0 {
+		item["assets"] = &types.AttributeValueMemberSS{Value: currentDDBPost.Assets}
+	}
+
+	return r.putItem(ctx, slug, item)
 }
 
 func newPostId() (string, error) {

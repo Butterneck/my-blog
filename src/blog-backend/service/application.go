@@ -45,7 +45,7 @@ func NewApplication(ctx context.Context) app.Application {
 			CreatePostDraft:  command.NewCreatePostDraftHandler(postRepository, assetStore),
 			UpdatePostDraft:  command.NewUpdatePostDraftHandler(postRepository, assetStore),
 			UnpublishPost:    command.NewUnpublishPostHandler(postRepository),
-			// DeletePostDraft:     command.NewDeletePostDraftHandler(postRepository),
+			DeletePost:       command.NewDeletePostHandler(postRepository),
 		},
 		Queries: app.Queries{
 			GetPublishedPosts: query.NewGetPublishedPostsHandler(postRepository),

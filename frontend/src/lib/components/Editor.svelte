@@ -25,7 +25,7 @@
 					return acc;
 				}, [])
 			});
-			// window.location.href = '/';
+			window.location.href = '/';
 		} else {
 
 			const foo = newAssets.reduce<File[]>((acc, asset) => {

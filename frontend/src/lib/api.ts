@@ -52,3 +52,9 @@ export async function publishPost(slug: string): Promise<any> {
         slug: slug,
     });
 }
+
+export async function unpublishPost(slug: string): Promise<any> {
+    return await DefaultService.unpublishPost({
+        slug: slug,
+    });
+}

@@ -15,6 +15,7 @@ type Commands struct {
 	CreatePostDraft  command.CreatePostDraftHandler
 	UpdatePostDraft  command.UpdatePostDraftHandler
 	UnpublishPost    command.UnpublishPostHandler
+	DeletePost       command.DeletePostHandler
 }
 
 type Queries struct {

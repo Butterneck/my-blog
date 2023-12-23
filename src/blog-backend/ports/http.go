@@ -81,8 +81,9 @@ func (p HttpServer) CreatePost(ctx context.Context, request CreatePostRequestObj
 }
 
 func (p HttpServer) DeletePost(ctx context.Context, request DeletePostRequestObject) (DeletePostResponseObject, error) {
-	// TODO: Implement
-	return nil, nil
+	return DeletePost204Response{}, p.app.Commands.DeletePost.Handle(ctx, command.DeletePost{
+		Slug: request.Slug,
+	})
 }
 
 func (p HttpServer) GetAnyPost(ctx context.Context, request GetAnyPostRequestObject) (GetAnyPostResponseObject, error) {
@@ -153,6 +154,12 @@ func (p HttpServer) UpdatePost(ctx context.Context, request UpdatePostRequestObj
 
 func (p HttpServer) PublishPost(ctx context.Context, request PublishPostRequestObject) (PublishPostResponseObject, error) {
 	return PublishPost201Response{}, p.app.Commands.PublishPostDraft.Handle(ctx, command.PublishPostDraft{
+		Slug: request.Slug,
+	})
+}
+
+func (p HttpServer) UnpublishPost(ctx context.Context, request UnpublishPostRequestObject) (UnpublishPostResponseObject, error) {
+	return UnpublishPost201Response{}, p.app.Commands.UnpublishPost.Handle(ctx, command.UnpublishPost{
 		Slug: request.Slug,
 	})
 }

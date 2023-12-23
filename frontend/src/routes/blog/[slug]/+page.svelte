@@ -7,8 +7,13 @@
 	import { blogMetaData } from '$lib/blogMetaData';
 	import { envVariables } from '$lib/envVariables';
 	import { getCurrentUser } from '$lib/auth';
-	import { publishPost } from '$lib/api';
+	import {
+		publishPost as publishPostApi,
+		unpublishPost as unpublishPostApi,
+		deletePost as deletePostApi
+	} from '$lib/api';
 	import { isPostPublised } from '$lib/utils';
+	import ConfirmBtnModal from '$lib/components/ConfirmBtnModal.svelte';
 
 	const post = data.post;
 
@@ -27,14 +32,23 @@
 		}
 	};
 
-	async function publish() {
-		await publishPost(post.slug);
+	async function publishPost() {
+		await publishPostApi(post.slug);
 		window.location.href = '/blog/' + post.slug;
 	}
 
-	async function unpublish() {
-		// await unpublishPost(post.slug, true);
-		// window.location.href = '/blog/' + post.slug;
+	async function unpublishPost() {
+		await unpublishPostApi(post.slug);
+		window.location.href = '/blog/' + post.slug;
+	}
+
+	async function deletePost() {
+		await deletePostApi(post.slug);
+		window.location.href = '/blog/' + post.slug;
+	}
+
+	async function foo() {
+		console.log('foo');
 	}
 </script>
 
@@ -89,25 +103,37 @@
 					</span>
 
 					{#if post.draft?.body || post.draft?.title}
-						<span class="align-middle">
-							<button
-								class="ml-2 mt-2 p-1 px-3 text-sm cursor-pointer max-w-full bg-green-500 text-white outline-1px rounded"
-								on:click={publish}
-							>
-								Publish
-							</button>
-						</span>
+						<ConfirmBtnModal
+							btnText="Publish"
+							header="Publish post"
+							color="green"
+							confirmMsg="Publish"
+							cancelMsg="Cancel"
+							message="Are you sure you want to publish this post?"
+							onConfirm={publishPost}
+						/>
 					{/if}
 
 					{#if isPostPublised(post)}
-						<span class="align-middle">
-							<button
-								class="ml-2 mt-2 p-1 px-3 text-sm cursor-pointer max-w-full bg-red-500 text-white outline-1px rounded"
-								on:click={unpublish}
-							>
-								Unpublish
-							</button>
-						</span>
+						<ConfirmBtnModal
+							btnText="Unpublish"
+							header="Unpublish post"
+							color="purple"
+							confirmMsg="Unpublish"
+							cancelMsg="Cancel"
+							message="Are you sure you want to unpublish this post?"
+							onConfirm={unpublishPost}
+						/>
+					{:else}
+						<ConfirmBtnModal
+							btnText="Delete"
+							header="Delete post"
+							color="red"
+							confirmMsg="Delete"
+							cancelMsg="Cancel"
+							message="Are you sure you want to delete this post?"
+							onConfirm={deletePost}
+						/>
 					{/if}
 				{/if}
 			{/await}

@@ -20,4 +20,5 @@ type Repository interface {
 		slug string,
 		updateFn func(h *Post) (*Post, error),
 	) error
+	DeletePost(ctx context.Context, slug string) error
 }
