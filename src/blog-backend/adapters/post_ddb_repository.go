@@ -18,16 +18,19 @@ import (
 const FirstYear = 2023
 const FeedName = "butterneck-blog"
 
+// TODO: Use nested structs to avoid having to use the same field names in different structs
 type DDBPost struct {
-	Id           string `dynamodbav:"id"`
-	Title        string `dynamodbav:"title"`
-	Body         string `dynamodbav:"body"`
-	Slug         string `dynamodbav:"slug"`
-	CreationDate int64  `dynamodbav:"creationDate"`
-	FeedName     string `dynamodbav:"feedName"`
-	DraftTitle   string `dynamodbav:"draftTitle"`
-	DraftBody    string `dynamodbav:"draftBody"`
-	DraftSlug    string `dynamodbav:"draftSlug"`
+	Id           string   `dynamodbav:"id"`
+	Title        string   `dynamodbav:"title"`
+	Body         string   `dynamodbav:"body"`
+	Slug         string   `dynamodbav:"slug"`
+	CreationDate int64    `dynamodbav:"creationDate"`
+	FeedName     string   `dynamodbav:"feedName"`
+	Assets       []string `dynamodbav:"assets"`
+	DraftTitle   string   `dynamodbav:"draftTitle"`
+	DraftBody    string   `dynamodbav:"draftBody"`
+	DraftSlug    string   `dynamodbav:"draftSlug"`
+	DraftAssets  []string `dynamodbav:"draftAssets"`
 }
 
 func (p *DDBPost) ToPost() (*post.Post, error) {
@@ -37,10 +40,12 @@ func (p *DDBPost) ToPost() (*post.Post, error) {
 		Body:         post.Body(p.Body),
 		Slug:         post.Slug(p.Slug),
 		CreationDate: p.CreationDate,
+		Assets:       p.Assets,
 		Draft: post.DraftAdapter{
-			Title: post.Title(p.DraftTitle),
-			Body:  post.Body(p.DraftBody),
-			Slug:  post.Slug(p.DraftSlug),
+			Title:  post.Title(p.DraftTitle),
+			Body:   post.Body(p.DraftBody),
+			Slug:   post.Slug(p.DraftSlug),
+			Assets: p.DraftAssets,
 		},
 	}
 
@@ -199,7 +204,7 @@ func (r *DDBPostRepository) GetPublishedPosts(ctx context.Context, pageSize *int
 	})
 	if err != nil {
 		fmt.Println(err)
-		return nil, fmt.Errorf("GetPublishedPosts - db.Scan - error: %v", err)
+		return nil, fmt.Errorf("GetPublishedPosts - db.Query - error: %v", err)
 	}
 
 	fmt.Println(resp)
@@ -270,7 +275,7 @@ func (r *DDBPostRepository) GetAllPosts(ctx context.Context, pageSize *int, enco
 		ExclusiveStartKey: exclusiveStartKey,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("GetAllPosts - db.Scan - error: %v", err)
+		return nil, fmt.Errorf("GetAllPosts - db.Query - error: %v", err)
 	}
 
 	ddbPosts := []*DDBPost{}
@@ -336,6 +341,16 @@ func (r *DDBPostRepository) UpdatePost(ctx context.Context, slug string, updateF
 		"feedName":     &types.AttributeValueMemberS{Value: FeedName},
 	}
 
+	// Conditionally add the draft assets to the item (ddb forbids empty sets)
+	if updatedPost.Draft().Assets() != nil && len(updatedPost.Draft().Assets()) > 0 {
+		item["draftAssets"] = &types.AttributeValueMemberSS{Value: updatedPost.Draft().Assets()}
+	}
+
+	// Conditionally add the assets to the item (ddb forbids empty sets)
+	if updatedPost.Assets() != nil && len(updatedPost.Assets()) > 0 {
+		item["assets"] = &types.AttributeValueMemberSS{Value: updatedPost.Assets()}
+	}
+
 	_, err = r.db.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String(r.tableName),
 		Item:      item,
@@ -353,19 +368,31 @@ func (r *DDBPostRepository) CreatePost(ctx context.Context, p *post.Post) error 
 		return fmt.Errorf("CreatePost - newPostId - error: %v", err)
 	}
 
+	item := map[string]types.AttributeValue{
+		"id":           &types.AttributeValueMemberS{Value: newId},
+		"title":        &types.AttributeValueMemberS{Value: p.Title()},
+		"body":         &types.AttributeValueMemberS{Value: p.Body()},
+		"slug":         &types.AttributeValueMemberS{Value: p.Slug()},
+		"creationDate": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", p.CreationDate())},
+		"draftTitle":   &types.AttributeValueMemberS{Value: p.Draft().Title()},
+		"draftBody":    &types.AttributeValueMemberS{Value: p.Draft().Body()},
+		"draftSlug":    &types.AttributeValueMemberS{Value: p.Draft().Slug()},
+		"feedName":     &types.AttributeValueMemberS{Value: FeedName},
+	}
+
+	// Conditionally add the draft assets to the item (ddb forbids empty sets)
+	if p.Draft().Assets() != nil && len(p.Draft().Assets()) > 0 {
+		item["draftAssets"] = &types.AttributeValueMemberSS{Value: p.Draft().Assets()}
+	}
+
+	// Conditionally add the assets to the item (ddb forbids empty sets)
+	if p.Assets() != nil && len(p.Assets()) > 0 {
+		item["assets"] = &types.AttributeValueMemberSS{Value: p.Assets()}
+	}
+
 	_, err = r.db.PutItem(ctx, &dynamodb.PutItemInput{
-		TableName: aws.String(r.tableName),
-		Item: map[string]types.AttributeValue{
-			"id":           &types.AttributeValueMemberS{Value: newId},
-			"title":        &types.AttributeValueMemberS{Value: p.Title()},
-			"body":         &types.AttributeValueMemberS{Value: p.Body()},
-			"slug":         &types.AttributeValueMemberS{Value: p.Slug()},
-			"creationDate": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", p.CreationDate())},
-			"draftTitle":   &types.AttributeValueMemberS{Value: p.Draft().Title()},
-			"draftBody":    &types.AttributeValueMemberS{Value: p.Draft().Body()},
-			"draftSlug":    &types.AttributeValueMemberS{Value: p.Draft().Slug()},
-			"feedName":     &types.AttributeValueMemberS{Value: FeedName},
-		},
+		TableName:           aws.String(r.tableName),
+		Item:                item,
 		ConditionExpression: aws.String("attribute_not_exists(id)"),
 	})
 	if err != nil {

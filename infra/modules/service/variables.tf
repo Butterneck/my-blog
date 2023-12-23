@@ -32,3 +32,9 @@ variable "backend_image_uri" {
   type        = string
   description = "The ECR image URI containing the backend's deployment package."
 }
+
+variable "iam_role_policies" {
+  description = "A list of additional JSON formatted IAM policies to attach to the Lambda function's IAM role"
+  type        = map(string)
+  default     = {}
+}

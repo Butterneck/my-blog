@@ -6,5 +6,6 @@
 export type NewPostRequest = {
     title: string;
     body: string;
+    assets?: Array<Blob>;
 };
 

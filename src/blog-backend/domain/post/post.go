@@ -11,6 +11,7 @@ type Post struct {
 	slug         Slug
 	creationDate int64
 	draft        Draft
+	assets       []string
 }
 
 type PostAdapter struct {
@@ -19,11 +20,12 @@ type PostAdapter struct {
 	Slug         Slug
 	CreationDate int64
 	Draft        DraftAdapter
+	Assets       []string
 }
 
-func NewPost(title, body string) (*Post, error) {
+func NewPost(title, body string, assets []string) (*Post, error) {
 
-	draft, err := newDraft(title, body)
+	draft, err := newDraft(title, body, assets)
 	if err != nil {
 		return nil, fmt.Errorf("NewPost - error: %v", err)
 	}
@@ -47,6 +49,7 @@ func (p *Post) HasUnpublishedChanges() bool {
 func (p *Post) Publish() error {
 	p.title = p.draft.title
 	p.body = p.draft.body
+	p.assets = p.draft.assets
 
 	// Set only on first publish
 	if !p.IsPublished() {
@@ -79,8 +82,24 @@ func (p *Post) UpdateBody(body string) error {
 	return nil
 }
 
+func (p *Post) AddAssets(assets []string) error {
+	_, err := p.draft.addAssets(assets)
+	if err != nil {
+		return fmt.Errorf("AddAssets - error: %v", err)
+	}
+	return nil
+}
+
+func (p *Post) RemoveAssets(assets []string) error {
+	_, err := p.draft.removeAssets(assets)
+	if err != nil {
+		return fmt.Errorf("UpdateAssets - error: %v", err)
+	}
+	return nil
+}
+
 func (p *Post) Unpublish() error {
-	draft, err := newDraft(string(p.title), string(p.body))
+	draft, err := newDraft(string(p.title), string(p.body), p.assets)
 	if err != nil {
 		return fmt.Errorf("Unpublish - error: %v", err)
 	}
@@ -90,6 +109,7 @@ func (p *Post) Unpublish() error {
 	p.title = ""
 	p.body = ""
 	p.creationDate = 0
+	p.assets = []string{}
 
 	return nil
 }
@@ -118,6 +138,10 @@ func (p *Post) String() string {
 	return fmt.Sprintf("Post{title: %s, body: %s, slug: %s, creationDate: %d, draft: %v}", p.title, p.body, p.slug, p.creationDate, p.draft)
 }
 
+func (p *Post) Assets() []string {
+	return p.assets
+}
+
 // This method is used to load objects from various adapters who need to provide a PostAdapter object
 // DO not use this method to create a new Post object, it may not be in a valid state, use NewPost instead
 func LoadPostFromAdapter(post PostAdapter) (*Post, error) {
@@ -126,10 +150,12 @@ func LoadPostFromAdapter(post PostAdapter) (*Post, error) {
 		body:         post.Body,
 		slug:         post.Slug,
 		creationDate: post.CreationDate,
+		assets:       post.Assets,
 		draft: Draft{
-			title: post.Draft.Title,
-			body:  post.Draft.Body,
-			slug:  post.Draft.Slug,
+			title:  post.Draft.Title,
+			body:   post.Draft.Body,
+			slug:   post.Draft.Slug,
+			assets: post.Draft.Assets,
 		},
 	}, nil
 }

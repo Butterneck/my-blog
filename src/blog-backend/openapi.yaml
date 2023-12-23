@@ -102,7 +102,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/NewPostRequest'
       responses:
@@ -191,7 +191,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/UpdatePostRequest'
       responses:
@@ -247,7 +247,35 @@ paths:
       summary: Publish the draft of a post
       responses:
         201:
-          description: Post successfully created
+          description: Post successfully published
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server
+      security:
+      - admin-authorizer: []
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: ${integration_uri}
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+  /api/v1/admin/posts/{slug}/unpublish:
+    parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      operationId: unpublishPost
+      summary: Unpublish a post overriding its draft
+      responses:
+        201:
+          description: Post successfully unpublished
         400:
           description: Bad Request
         500:
@@ -290,6 +318,7 @@ components:
         - creationDate
         - slug
         - draft
+        - assets
       properties:
         title:
           type: string
@@ -300,6 +329,10 @@ components:
           x-go-type: int64
         slug:
           type: string
+        assets:
+          type: array
+          items:
+            type: string
         draft:
           $ref: '#/components/schemas/PostDraft'
     PostDraft:
@@ -307,11 +340,16 @@ components:
       required:
         - title
         - body
+        - assets
       properties:
         title:
           type: string
         body:
           type: string
+        assets:
+          type: array
+          items:
+            type: string
     UpdatePostRequest:
       type: object
       properties:
@@ -319,6 +357,15 @@ components:
           type: string
         body:
           type: string
+        newAssets:
+          type: array
+          items:
+            type: string
+            format: binary
+        deletedAssets:
+          type: array
+          items:
+            type: string
     NewPostRequest:
       type: object
       required:
@@ -329,6 +376,11 @@ components:
           type: string
         body:
           type: string
+        assets:
+          type: array
+          items:
+            type: string
+            format: binary
   securitySchemes:
     admin-authorizer:
       type: "apiKey"

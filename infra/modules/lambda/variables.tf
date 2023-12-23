@@ -69,7 +69,7 @@ variable "has_dynamodb_table" {
 }
 
 variable "iam_role_policies" {
-  description = "A list of additional IAM policy ARNs to attach to the Lambda function's IAM role"
+  description = "A list of additional JSON formatted IAM policies to attach to the Lambda function's IAM role"
   type        = map(string)
   default     = {}
 }

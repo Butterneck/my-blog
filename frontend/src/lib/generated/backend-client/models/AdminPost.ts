@@ -10,6 +10,7 @@ export type AdminPost = {
     body: string;
     creationDate: number;
     slug: string;
+    assets: Array<string>;
     draft: PostDraft;
 };
 

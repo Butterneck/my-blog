@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -333,7 +334,7 @@ func (response GetAllPosts500Response) VisitGetAllPostsResponse(w http.ResponseW
 }
 
 type CreatePostRequestObject struct {
-	Body *CreatePostJSONRequestBody
+	Body *multipart.Reader
 }
 
 type CreatePostResponseObject interface {
@@ -431,7 +432,7 @@ func (response GetAnyPost500Response) VisitGetAnyPostResponse(w http.ResponseWri
 
 type UpdatePostRequestObject struct {
 	Slug string `json:"slug"`
-	Body *UpdatePostJSONRequestBody
+	Body *multipart.Reader
 }
 
 type UpdatePostResponseObject interface {
@@ -637,13 +638,12 @@ func (sh *strictHandler) GetAllPosts(ctx *gin.Context, params GetAllPostsParams)
 func (sh *strictHandler) CreatePost(ctx *gin.Context) {
 	var request CreatePostRequestObject
 
-	var body CreatePostJSONRequestBody
-	if err := ctx.ShouldBind(&body); err != nil {
-		ctx.Status(http.StatusBadRequest)
+	if reader, err := ctx.Request.MultipartReader(); err == nil {
+		request.Body = reader
+	} else {
 		ctx.Error(err)
 		return
 	}
-	request.Body = &body
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.CreatePost(ctx, request.(CreatePostRequestObject))
@@ -726,13 +726,12 @@ func (sh *strictHandler) UpdatePost(ctx *gin.Context, slug string) {
 
 	request.Slug = slug
 
-	var body UpdatePostJSONRequestBody
-	if err := ctx.ShouldBind(&body); err != nil {
-		ctx.Status(http.StatusBadRequest)
+	if reader, err := ctx.Request.MultipartReader(); err == nil {
+		request.Body = reader
+	} else {
 		ctx.Error(err)
 		return
 	}
-	request.Body = &body
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.UpdatePost(ctx, request.(UpdatePostRequestObject))

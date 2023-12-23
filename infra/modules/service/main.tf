@@ -34,6 +34,7 @@ module "lambda" {
   dynamodb_table_name = length(module.dynamodb_table) > 0 ? module.dynamodb_table[0].name : null
   has_dynamodb_table  = var.dynamodb_config != null
   image_uri           = var.backend_image_uri
+  iam_role_policies   = var.iam_role_policies
 }
 
 

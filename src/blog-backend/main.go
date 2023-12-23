@@ -6,7 +6,8 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
-	"github.com/butterneck/my-blog/src/blog-backend/ddb"
+	"github.com/butterneck/my-blog/src/blog-backend/aws/ddb"
+	"github.com/butterneck/my-blog/src/blog-backend/aws/s3"
 	_log "github.com/butterneck/my-blog/src/blog-backend/log"
 	"github.com/butterneck/my-blog/src/blog-backend/ports"
 	"github.com/butterneck/my-blog/src/blog-backend/service"
@@ -43,6 +44,7 @@ func init() {
 	log := _log.GetLogger()
 	log.Debugf("main package - init")
 	ddb.Init(log)
+	s3.Init(log)
 
 	r := gin.Default()
 	r.Use(gin.Recovery())

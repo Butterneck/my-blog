@@ -6,5 +6,6 @@
 export type PostDraft = {
     title: string;
     body: string;
+    assets: Array<string>;
 };
 

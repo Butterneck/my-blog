@@ -119,6 +119,27 @@ module "blog_backend" {
   openapi_file_path      = local.backend_openapi_file_path
   backend_image_uri      = var.backend_image_uri
   existing_user_pool_arn = module.user_pool.arn
+  iam_role_policies = {
+    "s3-assets-read-write" = jsonencode({
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "s3:PutObject",
+            "s3:GetObject",
+            "s3:DeleteObject",
+            "s3:ListBucket"
+          ],
+          "Resource" : [
+            module.blog_assets_bucket.arn,
+            "${module.blog_assets_bucket.arn}/*"
+          ]
+        }
+      ]
+    })
+  }
+  
 }
 
 #################
@@ -128,6 +149,11 @@ module "blog_frontend" {
   source = "./modules/static-frontend"
   name   = "${local.name}-frontend"
   eventbridge_bus_name = aws_cloudwatch_event_bus.blog_butterneck_me.name
+}
+
+module "blog_assets_bucket" {
+  source = "./modules/s3-bucket"
+  name   = "${local.name}-assets"
 }
 
 #############################################
@@ -143,9 +169,14 @@ module "cdn" {
   domain_names           = [local.blog_domain]
   domain_names_zone_name = local.blog_domain
   s3_origins = {
-    "default" = {
+    default = {
       bucket_name = module.blog_frontend.name
       domain_name = module.blog_frontend.regional_domain_name
+    },
+    assets = {
+      bucket_name = module.blog_assets_bucket.name
+      domain_name = module.blog_assets_bucket.regional_domain_name
+      path_pattern = "/assets/*"
     }
   }
   apigw_origins = {

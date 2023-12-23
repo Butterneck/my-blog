@@ -8,6 +8,7 @@
 	import { envVariables } from '$lib/envVariables';
 	import { getCurrentUser } from '$lib/auth';
 	import { publishPost } from '$lib/api';
+	import { isPostPublised } from '$lib/utils';
 
 	const post = data.post;
 
@@ -29,6 +30,11 @@
 	async function publish() {
 		await publishPost(post.slug);
 		window.location.href = '/blog/' + post.slug;
+	}
+
+	async function unpublish() {
+		// await unpublishPost(post.slug, true);
+		// window.location.href = '/blog/' + post.slug;
 	}
 </script>
 
@@ -89,6 +95,17 @@
 								on:click={publish}
 							>
 								Publish
+							</button>
+						</span>
+					{/if}
+
+					{#if isPostPublised(post)}
+						<span class="align-middle">
+							<button
+								class="ml-2 mt-2 p-1 px-3 text-sm cursor-pointer max-w-full bg-red-500 text-white outline-1px rounded"
+								on:click={unpublish}
+							>
+								Unpublish
 							</button>
 						</span>
 					{/if}

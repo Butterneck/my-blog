@@ -5,18 +5,20 @@ import (
 )
 
 type Draft struct {
-	title Title
-	body  Body
-	slug  Slug
+	title  Title
+	body   Body
+	slug   Slug
+	assets []string
 }
 
 type DraftAdapter struct {
-	Title Title `json:"title"`
-	Body  Body  `json:"body"`
-	Slug  Slug  `json:"slug"`
+	Title  Title    `json:"title"`
+	Body   Body     `json:"body"`
+	Slug   Slug     `json:"slug"`
+	Assets []string `json:"assets"`
 }
 
-func newDraft(title, body string) (*Draft, error) {
+func newDraft(title, body string, assets []string) (*Draft, error) {
 	var err error
 	var d Draft
 
@@ -34,6 +36,8 @@ func newDraft(title, body string) (*Draft, error) {
 	if err != nil {
 		return nil, fmt.Errorf("NewDraft - error: %v", err)
 	}
+
+	d.assets = assets
 
 	return &d, nil
 }
@@ -63,6 +67,23 @@ func (d *Draft) updateBody(body string) (*Draft, error) {
 	return d, nil
 }
 
+func (d *Draft) addAssets(assets []string) (*Draft, error) {
+	d.assets = append(d.assets, assets...)
+	return d, nil
+}
+
+func (d *Draft) removeAssets(assets []string) (*Draft, error) {
+	for _, asset := range assets {
+		for i, a := range d.assets {
+			if a == asset {
+				d.assets = append(d.assets[:i], d.assets[i+1:]...)
+			}
+		}
+	}
+
+	return d, nil
+}
+
 func (d *Draft) Title() string {
 	return string(d.title)
 }
@@ -73,4 +94,8 @@ func (d *Draft) Body() string {
 
 func (d *Draft) Slug() string {
 	return string(d.slug)
+}
+
+func (d *Draft) Assets() []string {
+	return d.assets
 }

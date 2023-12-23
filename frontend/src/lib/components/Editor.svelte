@@ -3,57 +3,92 @@
 
 	let title: string = post?.draft?.title || post?.title || '';
 	let body: string = post?.draft?.body || post?.body || '';
-	let attachments: PostAttachment[] = post?.draft?.attachments || post?.attachments || [];
-	let attachmentInput: FileList;
+	let assets: string[] = post?.draft?.assets || post?.assets || [];
+
+	let newAssets: PostAsset[] = [];
+	let deletedAssets: string[] = [];
+	let assetInput: FileList;
 
 	import 'highlight.js/styles/default.css';
 	import { createPost, updatePost } from '$lib/api';
-
-	function uploadImages(e: File) {
-		// TODO: Implement logic to upload images to S3
-		console.log(e);
-		console.log('upload images');
-	}
+	import PostAssetBadge from './PostAssetBadge.svelte';
 
 	async function save() {
 		if (!post) {
-			await createPost({ title, body });
-			window.location.href = '/';
+			await createPost({
+				title,
+				body,
+				assets: newAssets.reduce<File[]>((acc, asset) => {
+					if (asset.file) {
+						acc.push(asset.file);
+					}
+					return acc;
+				}, [])
+			});
+			// window.location.href = '/';
 		} else {
-			post.title = title;
-			post.body = body;
-			await updatePost(post);
+
+			const foo = newAssets.reduce<File[]>((acc, asset) => {
+					console.log(asset)
+					if (asset.file) {
+						acc.push(asset.file);
+					}
+					return acc;
+				}, [])
+
+				console.log(foo)
+			await updatePost({
+				slug: post.slug,
+				title,
+				body,
+				newAssets: foo,
+				deletedAssets,
+			});
 			window.location.href = '/blog/' + post.slug;
 		}
 	}
-	
+
 	// Prevent default drag behaviors
 	function handleDragOver(event: DragEvent) {
 		event.preventDefault();
 	}
-	
+
 	// Handle dropped files
 	function handleDrop(event: DragEvent) {
 		event.preventDefault();
-		handleNewAttachments(event.dataTransfer?.files || new DataTransfer().files);
+		handleNewAssets(event.dataTransfer?.files || new DataTransfer().files);
 	}
 
 	// Handle clicks on file input
-	$: if (attachmentInput) {
-		handleNewAttachments(attachmentInput);
-		attachmentInput = new DataTransfer().files
+	$: if (assetInput) {
+		handleNewAssets(assetInput);
+		assetInput = new DataTransfer().files;
 	}
 
-	function handleNewAttachments(newAttachments: FileList) {
-		for (const attachment of newAttachments) {
-			attachments.push({ name: attachment.name });
+	function handleNewAssets(_newAssets: FileList) {
+		for (const asset of _newAssets) {
+			newAssets.push({ name: asset.name, file: asset });
 		}
-		attachments = attachments
+		newAssets = newAssets;
 	}
 
-	// Remove files from attachments
-	function removeAttachment(attachment: PostAttachment) {
-		attachments = attachments.filter((i: PostAttachment) => i.name !== attachment.name);
+	function removeNewAsset(asset: PostAsset) {
+		console.log("removeNewAsset")
+		newAssets = newAssets.filter((i: PostAsset) => i.name !== asset.name);
+	}
+
+	function removeExistingAsset(asset: string) {
+		console.log("removeExistingAsset")
+		assets = assets.filter((i: string) => i !== asset);
+		deletedAssets.push(asset);
+		deletedAssets = deletedAssets;
+	}
+
+	function restoreDeletedAsset(asset: string) {
+		console.log("restoreDeletedAsset")
+		deletedAssets = deletedAssets.filter((i: string) => i !== asset);
+		assets.push(asset);
+		assets = assets;
 	}
 </script>
 
@@ -90,37 +125,28 @@
 
 	<!-- Uploaded images -->
 	<div class="mt-2">
-		{#each attachments as attachment}
-			<span
-				id="badge-dismiss-dark"
-				class="inline-flex items-center px-2 py-1 me-2 mb-1 text-sm font-medium text-gray-800 bg-gray-100 rounded dark:bg-gray-700 dark:text-gray-300"
-			>
-				{attachment.name}
-				<button
-					on:click={() => removeAttachment(attachment)}
-					type="button"
-					class="inline-flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-sm hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-gray-300"
-					data-dismiss-target="#badge-dismiss-dark"
-					aria-label="Remove"
-				>
-					<svg
-						class="w-2 h-2"
-						aria-hidden="true"
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 14 14"
-					>
-						<path
-							stroke="currentColor"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-						/>
-					</svg>
-					<span class="sr-only">Remove badge</span>
-				</button>
-			</span>
+		{#each newAssets as newAsset}
+			<PostAssetBadge
+				asset={newAsset.name}
+				color="green"
+				onRemove={() => removeNewAsset(newAsset)}
+			/>
+		{/each}
+
+		{#each assets as asset}
+			<PostAssetBadge
+				asset={asset}
+				onRemove={() => removeExistingAsset(asset)}
+			/>
+		{/each}
+
+		{#each deletedAssets as deletedAsset}
+			<PostAssetBadge
+				asset={deletedAsset}
+				color="red"
+				restore={true}
+				onRestore={() => restoreDeletedAsset(deletedAsset)}
+			/>
 		{/each}
 	</div>
 
@@ -153,7 +179,7 @@
 				</p>
 				<!-- <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF</p> -->
 			</div>
-			<input bind:files={attachmentInput} id="dropzone-file" type="file" class="hidden" multiple />
+			<input bind:files={assetInput} id="dropzone-file" type="file" class="hidden" multiple />
 		</label>
 	</div>
 

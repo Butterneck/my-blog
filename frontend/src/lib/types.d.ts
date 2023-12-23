@@ -4,21 +4,30 @@ interface Post {
   title: string; 
   slug: string;
   draft?: Draft
-  attachments?: PostAttachment[]
+  assets?: string[]
 }
 
 interface Draft {
   body: string,
   title: string;
-  attachments?: PostAttachment[]
+  assets?: string[]
+}
+
+interface PostAsset {
+  file?: File,
+  name: string,
 }
 
 interface NewPost {
   title: string;
   body: string,
+  assets?: Array<Blob>;
 }
 
-interface PostAttachment {
-  name: string;
-  url?: string;
+interface UpdatedPost {
+  slug: string;
+  title: string;
+  body: string;
+  newAssets?: Array<Blob>;
+  deletedAssets?: Array<string>;
 }

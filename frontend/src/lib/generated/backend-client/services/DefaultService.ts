@@ -99,15 +99,15 @@ export class DefaultService {
      * @throws ApiError
      */
     public static createPost({
-        requestBody,
+        formData,
     }: {
-        requestBody: NewPostRequest,
+        formData: NewPostRequest,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/admin/posts',
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
             errors: {
                 400: `Bad Request`,
                 500: `Internal Server`,
@@ -168,10 +168,10 @@ export class DefaultService {
      */
     public static updatePost({
         slug,
-        requestBody,
+        formData,
     }: {
         slug: string,
-        requestBody: UpdatePostRequest,
+        formData: UpdatePostRequest,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
@@ -179,8 +179,8 @@ export class DefaultService {
             path: {
                 'slug': slug,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
             errors: {
                 400: `Bad Request`,
                 404: `Post not found`,

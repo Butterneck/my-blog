@@ -23,17 +23,20 @@ export async function getPost(slug: string): Promise<Post> {
 }
 
 export async function createPost(post: NewPost): Promise<any> {
+    console.log(post)
     return await DefaultService.createPost({
-        requestBody: post,
+        formData: post,
     });
 }
 
-export async function updatePost(post: Post): Promise<any> {
+export async function updatePost(post: UpdatedPost): Promise<any> {
     return await DefaultService.updatePost({
         slug: post.slug,
-        requestBody: {
+        formData: {
             title: post.title,
             body: post.body,
+            newAssets: post.newAssets,
+            deletedAssets: post.deletedAssets,
         },
     });
 }

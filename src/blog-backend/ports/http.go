@@ -2,7 +2,8 @@ package ports
 
 import (
 	"context"
-	"fmt"
+	"io"
+	"strings"
 
 	"github.com/butterneck/my-blog/src/blog-backend/app"
 	"github.com/butterneck/my-blog/src/blog-backend/app/command"
@@ -23,9 +24,6 @@ func NewHttpServer(application app.Application) HttpServer {
 }
 
 func (p HttpServer) GetAllPosts(ctx context.Context, request GetAllPostsRequestObject) (GetAllPostsResponseObject, error) {
-	fmt.Println("GetAllPosts")
-	fmt.Println(request)
-	fmt.Println(request)
 	resp, err := p.app.Queries.GetAllPosts.Handle(ctx, request.Params.PageSize, request.Params.NextPageToken)
 
 	posts := domainPostsToHttpAdminPosts(resp.Posts)
@@ -37,10 +35,49 @@ func (p HttpServer) GetAllPosts(ctx context.Context, request GetAllPostsRequestO
 }
 
 func (p HttpServer) CreatePost(ctx context.Context, request CreatePostRequestObject) (CreatePostResponseObject, error) {
-	return CreatePost201Response{}, p.app.Commands.CreatePostDraft.Handle(ctx, command.CreatePostDraft{
-		Title: request.Body.Title,
-		Body:  request.Body.Body,
-	})
+	var createPostDraft command.CreatePostDraft
+
+	for {
+		part, err := request.Body.NextPart()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return CreatePost500Response{}, err
+		}
+
+		// Check if the part is a file or a form field
+		if part.FileName() == "" {
+			// It's a form field
+			fieldValue, err := io.ReadAll(part)
+			if err != nil {
+				return CreatePost500Response{}, err
+			}
+
+			fieldName := part.FormName()
+
+			if fieldName == "title" {
+				createPostDraft.Title = string(fieldValue)
+			} else if fieldName == "body" {
+				createPostDraft.Body = string(fieldValue)
+			}
+		} else {
+			// It's a file, you can handle it accordingly
+			// For example, you can save the file to disk
+			fileName := part.FileName()
+			file, err := io.ReadAll(part)
+			if err != nil {
+				return CreatePost500Response{}, err
+			}
+
+			createPostDraft.Assets = append(createPostDraft.Assets, command.PostAsset{
+				Name: fileName,
+				File: file,
+			})
+		}
+	}
+
+	return CreatePost201Response{}, p.app.Commands.CreatePostDraft.Handle(ctx, createPostDraft)
 }
 
 func (p HttpServer) DeletePost(ctx context.Context, request DeletePostRequestObject) (DeletePostResponseObject, error) {
@@ -63,11 +100,55 @@ func (p HttpServer) GetAnyPost(ctx context.Context, request GetAnyPostRequestObj
 }
 
 func (p HttpServer) UpdatePost(ctx context.Context, request UpdatePostRequestObject) (UpdatePostResponseObject, error) {
-	return UpdatePost200Response{}, p.app.Commands.UpdatePostDraft.Handle(ctx, command.UpdatePostDraft{
-		Slug:  request.Slug,
-		Title: request.Body.Title,
-		Body:  request.Body.Body,
-	})
+	updatePostDraft := command.UpdatePostDraft{
+		Slug: request.Slug,
+	}
+
+	for {
+		part, err := request.Body.NextPart()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return UpdatePost500Response{}, err
+		}
+
+		// Check if the part is a file or a form field
+		if part.FileName() == "" {
+			// It's a form field
+			fieldValue, err := io.ReadAll(part)
+			if err != nil {
+				return UpdatePost500Response{}, err
+			}
+
+			fieldName := part.FormName()
+
+			if fieldName == "title" {
+				title := string(fieldValue)
+				updatePostDraft.Title = &title
+			} else if fieldName == "body" {
+				body := string(fieldValue)
+				updatePostDraft.Body = &body
+			} else if fieldName == "deletedAssets" {
+				updatePostDraft.DeletedAssets = strings.Split(string(fieldValue), ",")
+			}
+		} else {
+			// It's a file, you can handle it accordingly
+			// For example, you can save the file to disk
+			fileName := part.FileName()
+			file, err := io.ReadAll(part)
+			if err != nil {
+				return UpdatePost500Response{}, err
+			}
+
+			updatePostDraft.NewAssets = append(updatePostDraft.NewAssets, command.PostAsset{
+				Name: fileName,
+				File: file,
+			})
+		}
+	}
+
+	return UpdatePost200Response{}, p.app.Commands.UpdatePostDraft.Handle(ctx, updatePostDraft)
 }
 
 func (p HttpServer) PublishPost(ctx context.Context, request PublishPostRequestObject) (PublishPostResponseObject, error) {
@@ -128,6 +209,7 @@ func domainPostToHttpAdminPost(post *post.Post) AdminPost {
 		Draft:        domainDraftToHttpDraft(post.Draft()),
 		Slug:         post.Slug(),
 		Title:        post.Title(),
+		Assets:       post.Assets(),
 	}
 }
 
@@ -141,7 +223,8 @@ func domainPostsToHttpAdminPosts(posts []*post.Post) []AdminPost {
 
 func domainDraftToHttpDraft(draft *post.Draft) PostDraft {
 	return PostDraft{
-		Body:  draft.Body(),
-		Title: draft.Title(),
+		Body:   draft.Body(),
+		Title:  draft.Title(),
+		Assets: draft.Assets(),
 	}
 }
