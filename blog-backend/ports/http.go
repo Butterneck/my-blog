@@ -5,10 +5,10 @@ import (
 	"io"
 	"strings"
 
-	"github.com/butterneck/my-blog/src/blog-backend/app"
-	"github.com/butterneck/my-blog/src/blog-backend/app/command"
-	"github.com/butterneck/my-blog/src/blog-backend/app/query"
-	"github.com/butterneck/my-blog/src/blog-backend/domain/post"
+	"github.com/butterneck/my-blog/blog-backend/app"
+	"github.com/butterneck/my-blog/blog-backend/app/command"
+	"github.com/butterneck/my-blog/blog-backend/app/query"
+	"github.com/butterneck/my-blog/blog-backend/domain/post"
 )
 
 type AuthorizationHeaderCtxKey struct{}

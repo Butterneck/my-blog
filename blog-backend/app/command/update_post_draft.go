@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/butterneck/my-blog/src/blog-backend/domain/post"
+	"github.com/butterneck/my-blog/blog-backend/domain/post"
 )
 
 type UpdatePostDraft struct {

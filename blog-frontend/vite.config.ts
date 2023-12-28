@@ -1,5 +1,5 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config.js';
 import basicSSL from '@vitejs/plugin-basic-ssl';
 
 export default defineConfig({

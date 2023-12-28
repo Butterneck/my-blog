@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/butterneck/my-blog/src/blog-backend/domain/post"
+	"github.com/butterneck/my-blog/blog-backend/domain/post"
 	"github.com/google/uuid"
 )
 

@@ -11,7 +11,7 @@
 		"test": "vitest",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"generate": "openapi --input ../src/blog-backend/openapi.yaml --useOptions --output ./src/lib/generated/backend-client"
+		"generate": "openapi --input ../blog-backend/openapi.yaml --useOptions --output ./src/lib/generated/backend-client"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^2.0.0",

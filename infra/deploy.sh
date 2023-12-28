@@ -11,7 +11,7 @@ terraform apply -target=module.blog_backend.module.ecr_repository -var "backend_
 image_tag=$(date +%s)
 ecr_repository=$(terraform output -raw backend_ecr_repo_url)
 backend_image_uri=${ecr_repository}:${image_tag}
-docker build --platform linux/arm64 -t ${backend_image_uri} -f ../src/blog-backend/Dockerfile ../src/blog-backend
+docker build --platform linux/arm64 -t ${backend_image_uri} -f ../blog-backend/Dockerfile ../blog-backend
 docker push ${backend_image_uri}
 
 # Deploy all the infratructure

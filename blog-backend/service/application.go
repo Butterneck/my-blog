@@ -4,12 +4,12 @@ import (
 	"context"
 	"os"
 
-	"github.com/butterneck/my-blog/src/blog-backend/adapters"
-	"github.com/butterneck/my-blog/src/blog-backend/app"
-	"github.com/butterneck/my-blog/src/blog-backend/app/command"
-	"github.com/butterneck/my-blog/src/blog-backend/app/query"
-	"github.com/butterneck/my-blog/src/blog-backend/aws/ddb"
-	"github.com/butterneck/my-blog/src/blog-backend/aws/s3"
+	"github.com/butterneck/my-blog/blog-backend/adapters"
+	"github.com/butterneck/my-blog/blog-backend/app"
+	"github.com/butterneck/my-blog/blog-backend/app/command"
+	"github.com/butterneck/my-blog/blog-backend/app/query"
+	"github.com/butterneck/my-blog/blog-backend/aws/ddb"
+	"github.com/butterneck/my-blog/blog-backend/aws/s3"
 )
 
 // This function should configure the app.Application struct and return it.
