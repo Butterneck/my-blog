@@ -25,7 +25,7 @@ func NewS3AssetStore(s3Client *s3.Client, config S3AssetStoreConfig) *S3AssetSto
 	}
 }
 
-func (s *S3AssetStore) UploadAsset(ctx context.Context, asset []byte, name string) (string, error) {
+func (s *S3AssetStore) UploadAsset(ctx context.Context, asset []byte, name string) error {
 	var partMiBs int64 = 10
 	uploader := manager.NewUploader(s.s3, func(u *manager.Uploader) {
 		u.PartSize = partMiBs * 1024 * 1024
@@ -42,7 +42,25 @@ func (s *S3AssetStore) UploadAsset(ctx context.Context, asset []byte, name strin
 			s.bucketName, name, err)
 	}
 
-	return name, nil
+	return nil
+}
+
+func (s *S3AssetStore) MoveAsset(ctx context.Context, oldName, newName string) error {
+	_, err := s.s3.CopyObject(ctx, &s3.CopyObjectInput{
+		Bucket:     &s.bucketName,
+		CopySource: &oldName,
+		Key:        &newName,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = s.DeleteAsset(ctx, oldName)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *S3AssetStore) DeleteAsset(ctx context.Context, name string) error {

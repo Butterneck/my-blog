@@ -36,23 +36,30 @@ func NewCreatePostDraftHandler(postRepository post.Repository, assetStore post.A
 
 func (c CreatePostDraftHandler) Handle(ctx context.Context, cmd CreatePostDraft) error {
 
-	postAssets := []string{}
+	// Get assets from the request
+	postAssetNames := []string{}
+	postAssetFiles := map[string][]byte{}
 
-	// Upload assets to S3
 	for _, asset := range cmd.Assets {
-		_, err := c.postAssetStore.UploadAsset(ctx, asset.File, asset.Name)
-		if err != nil {
-			return err
-		}
+		postAssetNames = append(postAssetNames, asset.Name)
+		postAssetFiles[asset.Name] = asset.File
+	}
 
-		postAssets = append(postAssets, asset.Name)
+	// Create post
+	p, err := post.NewPost(cmd.Title, cmd.Body, postAssetNames)
+	if err != nil {
+		return err
 	}
 
 	// TODO: Replace on the body all the occurrencies of the old filename with the new one (the path on s3)
 
-	p, err := post.NewPost(cmd.Title, cmd.Body, postAssets)
-	if err != nil {
-		return err
+	// Upload assets to S3
+	for _, asset := range p.Draft().Assets() {
+		assetPath := p.Slug() + "/draft/" + asset
+		err = c.postAssetStore.UploadAsset(ctx, postAssetFiles[asset], assetPath)
+		if err != nil {
+			return err
+		}
 	}
 
 	return c.postRepository.CreatePost(ctx, p)

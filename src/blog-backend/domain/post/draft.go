@@ -37,7 +37,7 @@ func newDraft(title, body string, assets []string) (*Draft, error) {
 		return nil, fmt.Errorf("NewDraft - error: %v", err)
 	}
 
-	d.assets = assets
+	d.addAssets(assets)
 
 	return &d, nil
 }
@@ -67,8 +67,20 @@ func (d *Draft) updateBody(body string) (*Draft, error) {
 	return d, nil
 }
 
+func (d *Draft) addAsset(asset string) (*Draft, error) {
+	assetName, err := NewAsset(d.Slug(), asset)
+	if err != nil {
+		return d, fmt.Errorf("AddAsset - error: %v", err)
+	}
+
+	d.assets = append(d.assets, string(assetName))
+	return d, nil
+}
+
 func (d *Draft) addAssets(assets []string) (*Draft, error) {
-	d.assets = append(d.assets, assets...)
+	for _, asset := range assets {
+		d.addAsset(asset)
+	}
 	return d, nil
 }
 

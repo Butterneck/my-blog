@@ -36,7 +36,7 @@ func (c UpdatePostDraftHandler) Handle(ctx context.Context, cmd UpdatePostDraft)
 
 	newPostAssets := []string{}
 	for _, asset := range cmd.NewAssets {
-		_, err := c.assetStore.UploadAsset(ctx, asset.File, asset.Name)
+		err := c.assetStore.UploadAsset(ctx, asset.File, asset.Name)
 		if err != nil {
 			return err
 		}

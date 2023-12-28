@@ -49,7 +49,10 @@ func (p *Post) HasUnpublishedChanges() bool {
 func (p *Post) Publish() error {
 	p.title = p.draft.title
 	p.body = p.draft.body
-	p.assets = p.draft.assets
+
+	for _, asset := range p.draft.assets {
+		p.assets = append(p.assets, string(PublishAsset(Asset(asset))))
+	}
 
 	// Set only on first publish
 	if !p.IsPublished() {
@@ -99,7 +102,13 @@ func (p *Post) RemoveAssets(assets []string) error {
 }
 
 func (p *Post) Unpublish() error {
-	draft, err := newDraft(string(p.title), string(p.body), p.assets)
+
+	draftAssets := []string{}
+	for _, asset := range p.assets {
+		draftAssets = append(p.draft.assets, string(UnpublishAsset(Asset(asset))))
+	}
+
+	draft, err := newDraft(string(p.title), string(p.body), draftAssets)
 	if err != nil {
 		return fmt.Errorf("Unpublish - error: %v", err)
 	}

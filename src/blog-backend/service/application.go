@@ -41,11 +41,11 @@ func NewApplication(ctx context.Context) app.Application {
 
 	return app.Application{
 		Commands: app.Commands{
-			PublishPostDraft: command.NewPublishPostDraftHandler(postRepository),
+			PublishPostDraft: command.NewPublishPostDraftHandler(postRepository, assetStore),
 			CreatePostDraft:  command.NewCreatePostDraftHandler(postRepository, assetStore),
 			UpdatePostDraft:  command.NewUpdatePostDraftHandler(postRepository, assetStore),
-			UnpublishPost:    command.NewUnpublishPostHandler(postRepository),
-			DeletePost:       command.NewDeletePostHandler(postRepository),
+			UnpublishPost:    command.NewUnpublishPostHandler(postRepository, assetStore),
+			DeletePost:       command.NewDeletePostHandler(postRepository, assetStore),
 		},
 		Queries: app.Queries{
 			GetPublishedPosts: query.NewGetPublishedPostsHandler(postRepository),
