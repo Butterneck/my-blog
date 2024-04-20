@@ -3,19 +3,19 @@ package command
 import (
 	"context"
 
-	"github.com/butterneck/my-blog/blog-backend/domain/post"
+	"github.com/butterneck/my-blog/blog-backend-back/domain/post"
 )
 
-type UnpublishPost struct {
+type PublishPostDraft struct {
 	Slug string
 }
 
-type UnpublishPostHandler struct {
+type PublishPostDraftHandler struct {
 	postRepository post.Repository
 	postAssetStore post.AssetStore
 }
 
-func NewUnpublishPostHandler(postRepository post.Repository, assetStore post.AssetStore) UnpublishPostHandler {
+func NewPublishPostDraftHandler(postRepository post.Repository, assetStore post.AssetStore) PublishPostDraftHandler {
 	if postRepository == nil {
 		panic("postRepository is nil")
 	}
@@ -24,10 +24,10 @@ func NewUnpublishPostHandler(postRepository post.Repository, assetStore post.Ass
 		panic("assetStore is nil")
 	}
 
-	return UnpublishPostHandler{postRepository: postRepository, postAssetStore: assetStore}
+	return PublishPostDraftHandler{postRepository: postRepository, postAssetStore: assetStore}
 }
 
-func (c UnpublishPostHandler) Handle(ctx context.Context, cmd UnpublishPost) error {
+func (c PublishPostDraftHandler) Handle(ctx context.Context, cmd PublishPostDraft) error {
 
 	p, err := c.postRepository.GetAnyPost(ctx, cmd.Slug)
 	if err != nil {
@@ -36,14 +36,14 @@ func (c UnpublishPostHandler) Handle(ctx context.Context, cmd UnpublishPost) err
 
 	// Move draft assets to published assets
 	for _, asset := range p.Draft().Assets() {
-		err := c.postAssetStore.MoveAsset(ctx, p.Slug()+"/published/"+asset, p.Slug()+"/draft/"+asset)
+		err := c.postAssetStore.MoveAsset(ctx, p.Slug()+"/draft/"+asset, p.Slug()+"/published/"+asset)
 		if err != nil {
 			return err
 		}
 	}
 
 	return c.postRepository.UpdatePost(ctx, cmd.Slug, func(p *post.Post) (*post.Post, error) {
-		p.Unpublish()
+		p.Publish()
 		return p, nil
 	})
 }

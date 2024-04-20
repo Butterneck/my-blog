@@ -14,43 +14,44 @@ import (
 	"github.com/google/uuid"
 )
 
-// FirstYear is the first year that posts were published.
-const FirstYear = 2023
 const FeedName = "butterneck-blog"
 
-// TODO: Use nested structs to avoid having to use the same field names in different structs
 type DDBPost struct {
 	Id           string   `dynamodbav:"id"`
+	Slug         string   `dynamodbav:"slug"`
 	Title        string   `dynamodbav:"title"`
 	Body         string   `dynamodbav:"body"`
-	Slug         string   `dynamodbav:"slug"`
-	CreationDate int64    `dynamodbav:"creationDate"`
-	FeedName     string   `dynamodbav:"feedName"`
+	CreationDate int64    `dynamodbav:"creation_date"`
+	FeedName     string   `dynamodbav:"feed_name"`
 	Assets       []string `dynamodbav:"assets"`
-	DraftTitle   string   `dynamodbav:"draftTitle"`
-	DraftBody    string   `dynamodbav:"draftBody"`
-	DraftSlug    string   `dynamodbav:"draftSlug"`
-	DraftAssets  []string `dynamodbav:"draftAssets"`
-	Del          bool     `dynamodbav:"deleted"`
+	Del          bool     `dynamodbav:"del"`
+	Draft        DDBDraft `dynamodbav:"draft"`
+}
+
+type DDBDraft struct {
+	Slug   string   `dynamodbav:"slug"`
+	Title  string   `dynamodbav:"title"`
+	Body   string   `dynamodbav:"body"`
+	Assets []string `dynamodbav:"assets"`
 }
 
 func (p *DDBPost) ToPost() (*post.Post, error) {
 
-	postAdapter := &post.PostAdapter{
+	postAdapter := &post.PostRepositoryAdapter{
 		Title:        post.Title(p.Title),
 		Body:         post.Body(p.Body),
 		Slug:         post.Slug(p.Slug),
 		CreationDate: p.CreationDate,
 		Assets:       p.Assets,
-		Draft: post.DraftAdapter{
-			Title:  post.Title(p.DraftTitle),
-			Body:   post.Body(p.DraftBody),
-			Slug:   post.Slug(p.DraftSlug),
-			Assets: p.DraftAssets,
+		Draft: post.DraftRepositoryAdapter{
+			Title:  post.Title(p.Draft.Title),
+			Body:   post.Body(p.Draft.Body),
+			Slug:   post.Slug(p.Draft.Slug),
+			Assets: p.Draft.Assets,
 		},
 	}
 
-	post, err := post.LoadPostFromAdapter(*postAdapter)
+	post, err := post.LoadPostFromRepository(*postAdapter)
 	if err != nil {
 		return nil, fmt.Errorf("ToPost - LoadPostFromAdapter - error: %v", err)
 	}
@@ -338,13 +339,13 @@ func (r *DDBPostRepository) UpdatePost(ctx context.Context, slug string, updateF
 
 	item := map[string]types.AttributeValue{
 		"id":           &types.AttributeValueMemberS{Value: currentDDBPost.Id},
-		"title":        &types.AttributeValueMemberS{Value: updatedPost.Title()},
-		"body":         &types.AttributeValueMemberS{Value: updatedPost.Body()},
-		"slug":         &types.AttributeValueMemberS{Value: updatedPost.Slug()},
+		"title":        &types.AttributeValueMemberS{Value: updatedPost.Title().ToString()},
+		"body":         &types.AttributeValueMemberS{Value: updatedPost.Body().ToString()},
+		"slug":         &types.AttributeValueMemberS{Value: updatedPost.Slug().ToString()},
 		"creationDate": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", updatedPost.CreationDate())},
-		"draftTitle":   &types.AttributeValueMemberS{Value: updatedPost.Draft().Title()},
-		"draftBody":    &types.AttributeValueMemberS{Value: updatedPost.Draft().Body()},
-		"draftSlug":    &types.AttributeValueMemberS{Value: updatedPost.Draft().Slug()},
+		"draftTitle":   &types.AttributeValueMemberS{Value: updatedPost.Draft().Title().ToString()},
+		"draftBody":    &types.AttributeValueMemberS{Value: updatedPost.Draft().Body().ToString()},
+		"draftSlug":    &types.AttributeValueMemberS{Value: updatedPost.Draft().Slug().ToString()},
 		"feedName":     &types.AttributeValueMemberS{Value: FeedName},
 	}
 
@@ -381,13 +382,13 @@ func (r *DDBPostRepository) CreatePost(ctx context.Context, p *post.Post) error 
 
 	item := map[string]types.AttributeValue{
 		"id":           &types.AttributeValueMemberS{Value: newId},
-		"title":        &types.AttributeValueMemberS{Value: p.Title()},
-		"body":         &types.AttributeValueMemberS{Value: p.Body()},
-		"slug":         &types.AttributeValueMemberS{Value: p.Slug()},
+		"title":        &types.AttributeValueMemberS{Value: p.Title().ToString()},
+		"body":         &types.AttributeValueMemberS{Value: p.Body().ToString()},
+		"slug":         &types.AttributeValueMemberS{Value: p.Slug().ToString()},
 		"creationDate": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", p.CreationDate())},
-		"draftTitle":   &types.AttributeValueMemberS{Value: p.Draft().Title()},
-		"draftBody":    &types.AttributeValueMemberS{Value: p.Draft().Body()},
-		"draftSlug":    &types.AttributeValueMemberS{Value: p.Draft().Slug()},
+		"draftTitle":   &types.AttributeValueMemberS{Value: p.Draft().Title().ToString()},
+		"draftBody":    &types.AttributeValueMemberS{Value: p.Draft().Body().ToString()},
+		"draftSlug":    &types.AttributeValueMemberS{Value: p.Draft().Slug().ToString()},
 		"feedName":     &types.AttributeValueMemberS{Value: FeedName},
 	}
 
@@ -401,7 +402,7 @@ func (r *DDBPostRepository) CreatePost(ctx context.Context, p *post.Post) error 
 		item["assets"] = &types.AttributeValueMemberSS{Value: p.Assets()}
 	}
 
-	return r.putItem(ctx, p.Slug(), item)
+	return r.putItem(ctx, p.Slug().ToString(), item)
 }
 
 func (r *DDBPostRepository) DeletePost(ctx context.Context, slug string) error {
@@ -416,16 +417,16 @@ func (r *DDBPostRepository) DeletePost(ctx context.Context, slug string) error {
 		"body":         &types.AttributeValueMemberS{Value: currentDDBPost.Body},
 		"slug":         &types.AttributeValueMemberS{Value: currentDDBPost.Slug},
 		"creationDate": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", currentDDBPost.CreationDate)},
-		"draftTitle":   &types.AttributeValueMemberS{Value: currentDDBPost.DraftTitle},
-		"draftBody":    &types.AttributeValueMemberS{Value: currentDDBPost.DraftBody},
-		"draftSlug":    &types.AttributeValueMemberS{Value: currentDDBPost.DraftSlug},
+		"draftTitle":   &types.AttributeValueMemberS{Value: currentDDBPost.Draft.Title},
+		"draftBody":    &types.AttributeValueMemberS{Value: currentDDBPost.Draft.Body},
+		"draftSlug":    &types.AttributeValueMemberS{Value: currentDDBPost.Draft.Slug},
 		"feedName":     &types.AttributeValueMemberS{Value: FeedName},
 		"deleted":      &types.AttributeValueMemberBOOL{Value: true},
 	}
 
 	// Conditionally add the draft assets to the item (ddb forbids empty sets)
-	if currentDDBPost.DraftAssets != nil && len(currentDDBPost.DraftAssets) > 0 {
-		item["draftAssets"] = &types.AttributeValueMemberSS{Value: currentDDBPost.DraftAssets}
+	if currentDDBPost.Draft.Assets != nil && len(currentDDBPost.Draft.Assets) > 0 {
+		item["draftAssets"] = &types.AttributeValueMemberSS{Value: currentDDBPost.Draft.Assets}
 	}
 
 	// Conditionally add the assets to the item (ddb forbids empty sets)

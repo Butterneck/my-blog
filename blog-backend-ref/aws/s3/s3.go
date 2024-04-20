@@ -2,7 +2,7 @@ package s3
 
 import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/butterneck/my-blog/blog-backend/aws"
+	"github.com/butterneck/my-blog/blog-backend-back/aws"
 	"go.uber.org/zap"
 )
 

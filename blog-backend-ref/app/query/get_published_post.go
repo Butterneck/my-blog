@@ -3,7 +3,7 @@ package query
 import (
 	"context"
 
-	"github.com/butterneck/my-blog/blog-backend/domain/post"
+	"github.com/butterneck/my-blog/blog-backend-back/domain/post"
 )
 
 // Get a published post

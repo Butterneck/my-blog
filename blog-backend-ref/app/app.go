@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/butterneck/my-blog/blog-backend/app/command"
-	"github.com/butterneck/my-blog/blog-backend/app/query"
+	"github.com/butterneck/my-blog/blog-backend-back/app/command"
+	"github.com/butterneck/my-blog/blog-backend-back/app/query"
 )
 
 type Application struct {
